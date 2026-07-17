@@ -36,6 +36,8 @@ path="$0"
 [ "${path#/*}" = "$path" ] && path="./$path"
 exec < ${path%/*}/../sys/param.h
 
+option="$1"
+
 # Search for line
 # #define __NetBSD_Version__ <ver_num> /* NetBSD <ver_text> */
 #
@@ -51,12 +53,10 @@ done
 
 # default: return MM.mm.pp
 # -m: return MM, representing only the major number; however, for -current,
-#     return the next major number (e.g. for 5.99.nn, return 6)
+#      return the next major number (e.g. for 5.99.nn, return 6)
 # -n: return MM.mm
 # -s: return MMmmpp (no dots)
 # -k: return MM.mm on release branch, MM.mm.pp on current.
-
-option="$1"
 
 # ${rel_num} is [M]Mmm00pp00
 rel_num=${rel_num%??}
@@ -74,6 +74,15 @@ shift 3
 IFS=' '
 set -- $rel_MM ${rel_mm#0}$beta $*
 
+REPO_DIR="${path%/*}/../.."
+
+if [ -d "${REPO_DIR}/.git" ] && command -v git >/dev/null 2>&1; then
+    GIT_TAG=$(git -C "${REPO_DIR}" describe --tags --always 2>/dev/null)
+    BUNNY_VER="BUNNY-${GIT_TAG#v}"
+else
+    BUNNY_VER="BUNNY-unknown"
+fi
+
 case "$option" in
 -k)
 	if [ ${rel_mm#0} = 99 ]
@@ -84,12 +93,11 @@ case "$option" in
 		echo "${rel_MM}.${rel_mm#0}"
 	fi
 	;;
-	     
 -m)
 	echo "$(((${rel_MMmm}+1)/100))"
 	;;
 -n)
-	echo "${rel_MM}.${rel_mm#0}"
+	echo "${BUNNY_VER}-${rel_MM}.${rel_mm#0}"
 	;;
 -s)
 	IFS=
@@ -97,6 +105,6 @@ case "$option" in
 	;;
 *)
 	IFS=.
-	echo "$*"
+	echo "${BUNNY_VER}-${*}"
 	;;
 esac

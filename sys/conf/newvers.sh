@@ -217,8 +217,8 @@ else
 	else
 		v=0
 		t=$(LC_ALL=C TZ=UTC ${DATE} -r "${timestamp}")
-		u=mkrepro
-		h=mkrepro.NetBSD.org
+		u=bunny
+		h=bunny.karters.dev
 		d="/usr/src/sys/arch/${machine}/compile/${id}"
 	fi
 	reproversion=" #${v}: ${t}\n\t${u}@${h}:${d}"
@@ -228,7 +228,7 @@ cwd=$(dirname "$0")
 copyright="$(cat "${cwd}/copyright")"
 osrelcmd=${cwd}/osrelease.sh
 
-ost="NetBSD"
+ost="BunnyBSD"
 osr=$(sh $osrelcmd)
 
 fullversion="${ost} ${osr} (${id})${reproversion}\n"
