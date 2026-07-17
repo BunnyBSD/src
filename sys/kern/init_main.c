@@ -1166,6 +1166,14 @@ calc_cache_size(vsize_t vsize, int pct, int va_pct)
  */
 #define MEM_PBUFSIZE	sizeof("99999 MB")
 
+static void
+draw_bunny(void (*pr)(const char *, ...) __printflike(1, 2))
+{
+	(*pr)("  (\\_/)\n");
+	(*pr)("  (^.^)   <-- BunnyBSD Booting...\n");
+	(*pr)(" ( > < )\n");
+}
+
 void
 banner(void)
 {
@@ -1188,7 +1196,8 @@ banner(void)
 	}
 
 	memset(pbuf, 0, sizeof(pbuf));
-	(*pr)("%s%s", copyright, version);
+	(*pr)("%s", version);
+	draw_bunny(pr);
 	format_bytes(pbuf, MEM_PBUFSIZE, ctob((uint64_t)physmem));
 	(*pr)("total memory = %s\n", pbuf);
 	format_bytes(pbuf, MEM_PBUFSIZE, ctob((uint64_t)uvm_availmem(false)));
