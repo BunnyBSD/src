@@ -7,3 +7,5 @@ sys/arch/*/compile/BUNNYCORE*
 compile_commands.json
 .clangd
 .DS_Store
+.cache
+.vscode
