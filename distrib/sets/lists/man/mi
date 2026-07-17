@@ -41,6 +41,7 @@
 ./usr/share/info/vi.info			man-sys-info		doc,info
 ./usr/share/man/cat1/Mail.0			man-obsolete		obsolete
 ./usr/share/man/cat1/[.0			man-util-catman		.cat
+./usr/share/man/cat1/_debug.0           man-util-catman         .cat
 ./usr/share/man/cat1/agrep.0			man-util-catman		.cat
 ./usr/share/man/cat1/aiomixer.0			man-audio-catman	.cat
 ./usr/share/man/cat1/alias.0			man-util-catman		.cat
@@ -3629,6 +3630,7 @@
 ./usr/share/man/cat9lua/systm.0			man-sys-catman		.cat
 ./usr/share/man/man1/Mail.1			man-obsolete		obsolete
 ./usr/share/man/man1/[.1			man-util-man		.man
+./usr/share/man/man1/_debug.1                  man-util-share          man
 ./usr/share/man/man1/agrep.1			man-util-man		.man
 ./usr/share/man/man1/aiomixer.1			man-audio-man		.man
 ./usr/share/man/man1/alias.1			man-util-man		.man

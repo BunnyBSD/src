@@ -516,6 +516,7 @@
 ./usr						base-sys-root
 ./usr/bin					base-sys-usr
 ./usr/bin/Mail					base-obsolete		obsolete
+./usr/bin/_debug                base-util-bin
 ./usr/bin/agrep					base-util-bin
 ./usr/bin/aiomixer				base-audio-bin
 ./usr/bin/apply					base-util-bin

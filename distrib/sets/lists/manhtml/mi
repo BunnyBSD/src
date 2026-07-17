@@ -5,6 +5,7 @@
 ./etc/mtree/set.manhtml				man-sys-root
 ./usr/share/man/html1/Mail.html			man-obsolete		obsolete
 ./usr/share/man/html1/[.html			man-util-htmlman	html
+./usr/share/man/html1/_debug.html       man-util-htmlman        html
 ./usr/share/man/html1/agrep.html		man-util-htmlman	html
 ./usr/share/man/html1/aiomixer.html		man-audio-htmlman	html
 ./usr/share/man/html1/alias.html		man-util-htmlman	html

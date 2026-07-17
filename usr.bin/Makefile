@@ -3,7 +3,7 @@
 
 .include <bsd.own.mk>
 
-SUBDIR= aiomixer apply asa at audio audiocfg \
+SUBDIR= _debug aiomixer apply asa at audio audiocfg \
 	banner base64 basename biff bthset btkey btpin \
 	bzip2 bzip2recover c11 c17 c89 c99 cal calendar cap_mkdb cdplay \
 	checknr chflags chpass cksum cmp cleantags col colcrt colrm \
@@ -58,7 +58,7 @@ SUBDIR+= grep
 .if (${MKPIGZGZIP} != "no")
 # nothing
 .else
-SUBDIR+= gzip 
+SUBDIR+= gzip
 .endif
 
 .if (${MKHESIOD} != "no")
