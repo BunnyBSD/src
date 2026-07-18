@@ -76,8 +76,10 @@ sy_invoke(const struct sysent *sy, struct lwp *l, const void *uap,
 #ifdef PLEDGE
     if (l->l_proc->p_pledged) {
         if (!pledge_check(l, code)) {
+            if (l->l_proc->p_pledge & PLEDGE_ERROR) {
+				return EPERM;
+			}
             sigexit(l, SIGABRT);
-            return EPERM;
         }
     }
 #endif

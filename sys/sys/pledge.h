@@ -25,12 +25,16 @@
  */
 
 #pragma once
+#include <sys/stdbool.h>
+
 #if defined(_KERNEL) && !defined(_RUMPKERNEL) && !defined(_MODULE)
 #include "opt_pledge.h"
 #endif
 
-#define PLEDGE_STDIO (1ULL << 0)
-#define PLEDGE_RPATH (1ULL << 1)
+#define PLEDGE_ERROR (1ULL << 0)
+#define PLEDGE_STDIO (1ULL << 1)
+#define PLEDGE_RPATH (1ULL << 2)
+
 
 #ifdef _KERNEL
 #ifdef PLEDGE

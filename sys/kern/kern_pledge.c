@@ -81,6 +81,9 @@ sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
      * TODO: rewrite parser after POC
      */
     uint64_t new_mask = 0;
+    if (strstr(buf, "error") != NULL)
+        new_mask |= PLEDGE_ERROR;
+
     if (strstr(buf, "stdio") != NULL)
         new_mask |= PLEDGE_STDIO;
 
