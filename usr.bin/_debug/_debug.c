@@ -13,8 +13,8 @@
 int
 main(int argc, char *argv[])
 {
-    printf("Trying to set pledge(\"stdio\")\n");
-    if (pledge("stdio", NULL) != 0) {
+    printf("Trying to set pledge(\"stdio error\")\n");
+    if (pledge("stdio error", NULL) != 0) {
         printf("pledge err: %s\n", strerror(errno));
         return 1;
     }
