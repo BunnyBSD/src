@@ -352,7 +352,7 @@ struct proc {
 	krwlock_t	p_reflock;	/* :: lock for debugger, procfs */
 
 	uint64_t    p_pledge; /* :: pledge mask */
-	bool        p_pledged; /* is process pledged at all */
+	bool        p_pledged; /* :: is process pledged at all */
 };
 
 #define	p_rlimit	p_limit->pl_rlimit
