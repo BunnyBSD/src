@@ -68,6 +68,7 @@
 #ifndef _SYS_PROC_H_
 #define	_SYS_PROC_H_
 
+#include <sys/stdbool.h>
 #include <sys/lwp.h>
 
 #if defined(_KMEMUSER) || defined(_KERNEL)
@@ -92,6 +93,7 @@
 #include <sys/siginfo.h>
 #include <sys/event.h>
 #include <sys/specificdata.h>
+#include <sys/pledge.h>
 
 #ifdef _KERNEL
 #include <sys/resourcevar.h>
@@ -348,6 +350,9 @@ struct proc {
 	    __aligned(COHERENCY_UNIT);
 	kmutex_t	p_stmutex;	/* :: mutex on profiling state */
 	krwlock_t	p_reflock;	/* :: lock for debugger, procfs */
+
+	uint64_t    p_pledge; /* :: pledge mask */
+	bool        p_pledged; /* is process pledged at all */
 };
 
 #define	p_rlimit	p_limit->pl_rlimit

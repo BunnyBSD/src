@@ -1,1 +1,2 @@
 include "arch/evbarm/conf/GENERIC64"
+options PLEDGE

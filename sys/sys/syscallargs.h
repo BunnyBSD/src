@@ -1,4 +1,4 @@
-/* $NetBSD: syscallargs.h,v 1.312 2024/10/09 16:29:11 christos Exp $ */
+/* $NetBSD$ */
 
 /*
  * System call argument lists.
@@ -3419,6 +3419,14 @@ struct sys_semtimedop_args {
 check_syscall_args(sys_semtimedop)
 #endif /* !RUMP_CLIENT */
 
+#ifndef RUMP_CLIENT
+struct sys_pledge_args {
+	syscallarg(const char *) promises;
+	syscallarg(const char *) execpromises;
+};
+check_syscall_args(sys_pledge)
+#endif /* !RUMP_CLIENT */
+
 /*
  * System call prototypes.
  */
@@ -4356,6 +4364,8 @@ int	sys_epoll_pwait2(struct lwp *, const struct sys_epoll_pwait2_args *, registe
 int	sys___dup3100(struct lwp *, const struct sys___dup3100_args *, register_t *);
 
 int	sys_semtimedop(struct lwp *, const struct sys_semtimedop_args *, register_t *);
+
+int	sys_pledge(struct lwp *, const struct sys_pledge_args *, register_t *);
 
 #endif /* !RUMP_CLIENT */
 #endif /* _SYS_SYSCALLARGS_H_ */

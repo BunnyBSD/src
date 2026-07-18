@@ -528,6 +528,9 @@ fork1(struct lwp *l1, int flags, int exitsig, void *stack, size_t stacksize,
 	LIST_INSERT_HEAD(&parent->p_children, p2, p_sibling);
 	p2->p_exitsig = exitsig;		/* signal for parent on exit */
 
+	p2->p_pledge = p1->p_pledge; /* Pledge from parent */
+	p2->p_pledged = p1->p_pledged;
+
 	/*
 	 * Trace fork(2) and vfork(2)-like events on demand in a debugger.
 	 */

@@ -1,1 +1,2 @@
 include "arch/amd64/conf/MICROVM"
+options PLEDGE

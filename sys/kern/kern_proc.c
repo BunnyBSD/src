@@ -1059,6 +1059,10 @@ proc_alloc(void)
 
 	p = pool_cache_get(proc_cache, PR_WAITOK);
 	p->p_stat = SIDL;			/* protect against others */
+
+	p->p_pledge = 0;            /* not pledged by defult */
+	p->p_pledged = false;
+
 	proc_initspecific(p);
 	kdtrace_proc_ctor(NULL, p);
 

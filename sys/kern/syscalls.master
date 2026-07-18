@@ -719,7 +719,7 @@
 349	STD		{ int|sys||_sched_getaffinity(pid_t pid, lwpid_t lid, \
 			    size_t size, cpuset_t *cpuset); }
 350	STD		{ int|sys||sched_yield(void); }
-351	STD		{ int|sys||_sched_protect(int priority); }	
+351	STD		{ int|sys||_sched_protect(int priority); }
 352	UNIMPL
 353	UNIMPL
 
@@ -1068,3 +1068,4 @@
 506	STD MODULAR sysv_ipc { int|sys||semtimedop(int semid, \
 			    struct sembuf *sops, size_t nsops, \
 			    struct timespec *timeout); }
+507 STD         { int|sys||pledge(const char *promises, const char *execpromises); }
