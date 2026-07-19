@@ -28,6 +28,9 @@
 #include <sys/stdbool.h>
 #include <sys/stdint.h>
 
+struct lwp;
+struct sockaddr;
+
 #if defined(_KERNEL) && !defined(_RUMPKERNEL) && !defined(_MODULE)
 #include "opt_pledge.h"
 #endif
@@ -71,8 +74,6 @@
 #ifdef _KERNEL
 #ifdef PLEDGE
 
-struct lwp;
-struct sockaddr;
 bool pledge_check(struct lwp *, int);
 
 int pledge_open_check(struct lwp *l, int flags);
@@ -89,6 +90,15 @@ struct pledge_promise {
 
 extern const struct pledge_promise pledge_promises[];
 
+#else /* PLEDGE */
+#define pledge_check(l, code)                 true
+
+#define pledge_open_check(l, flags)           0
+#define pledge_socket_check(l, domain)        0
+#define pledge_ioctl_check(l, com)            0
+#define pledge_sendit_check(l, sa)            0
+#define pledge_fcntl_check(l, cmd)            0
+#define pledge_sysctl_check(l, name, namelen) 0
 #endif /* PLEDGE */
 #else /* _KERNEL */
 

@@ -342,7 +342,16 @@ struct pledge_promise {{
 
 extern const struct pledge_promise pledge_promises[];
 
-#endif /* PLEDGE */
+#else /* PLEDGE */
+#define pledge_check(l, code)                 true
+
+#define pledge_open_check(l, flags)           0
+#define pledge_socket_check(l, domain)        0
+#define pledge_ioctl_check(l, com)            0
+#define pledge_sendit_check(l, sa)            0
+#define pledge_fcntl_check(l, cmd)            0
+#define pledge_sysctl_check(l, name, namelen) 0
+#endif /* PLEDGE*/
 #else /* _KERNEL */
 
 #include <sys/cdefs.h>
