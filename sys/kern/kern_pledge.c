@@ -111,6 +111,8 @@ sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
     int error;
     uint64_t new_mask = 0;
 
+    if (SCARG(uap, execpromises) != NULL) return ENOSYS; /* execpromises not implemented yet*/
+
     if (SCARG(uap, promises) != NULL) {
         error = copyinstr(SCARG(uap, promises), buf, sizeof(buf), &done);
         if (error)
@@ -120,7 +122,7 @@ sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
         if (error)
             return error;
 
-        // proc can only drop pledges
+        /* proc can only drop pledges */
         if (l->l_proc->p_pledged) {
             if ((new_mask & ~l->l_proc->p_pledge) != 0) {
                 return EPERM;
@@ -129,12 +131,6 @@ sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
 
         l->l_proc->p_pledge = new_mask;
         l->l_proc->p_pledged = true;
-    }
-
-    if (SCARG(uap, execpromises) != NULL) {
-        /*
-         * TODO: execpledges
-         */
     }
 
     return 0;
