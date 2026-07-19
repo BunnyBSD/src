@@ -73,6 +73,13 @@
 struct lwp;
 bool pledge_check(struct lwp *, int);
 
+int pledge_open_check(struct lwp *l, int flags);
+int pledge_socket_check(struct lwp *l, int domain);
+int pledge_ioctl_check(struct lwp *l, unsigned long com);
+int pledge_sendit_check(struct lwp *l, const void *user_addr);
+int pledge_fcntl_check(struct lwp *l, int cmd);
+int pledge_sysctl_check(struct lwp *l, unsigned int *user_name, unsigned int namelen);
+
 struct pledge_promise {
     const char *name;
     uint64_t mask;
