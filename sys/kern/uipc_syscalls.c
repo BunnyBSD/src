@@ -92,6 +92,7 @@ __KERNEL_RCSID(0, "$NetBSD: uipc_syscalls.c,v 1.215 2025/07/16 19:14:13 kre Exp 
 #include <sys/syscallargs.h>
 #include <sys/systm.h>
 #include <sys/un.h>
+#include <sys/uio.h>
 
 #ifdef SCTP
 #include <netinet/sctp_peeloff.h>
@@ -137,15 +138,15 @@ sys_bind(struct lwp *l, const struct sys_bind_args *uap, register_t *retval)
 		syscallarg(const struct sockaddr *)	name;
 		syscallarg(unsigned int)		namelen;
 	} */
-	int		error;
-	
-	error = pledge_sendit_check(l, SCARG(uap, name));
-	if (error)
-		return error;
-	
 	struct sockaddr_big sb;
+	int		error;
 
 	error = sockargs_sb(&sb, SCARG(uap, name), SCARG(uap, namelen));
+	if (error)
+		return error;
+
+	/* TOCTOU-safe check */
+	error = pledge_sendit_check(l, (struct sockaddr *)&sb);
 	if (error)
 		return error;
 
@@ -356,16 +357,18 @@ sys_connect(struct lwp *l, const struct sys_connect_args *uap,
 		syscallarg(const struct sockaddr *)	name;
 		syscallarg(unsigned int)		namelen;
 	} */
-	int		error;
-	error = pledge_sendit_check(l, SCARG(uap, name));
-	if (error)
-		return error;
-
 	struct sockaddr_big sbig;
+	int		error;
 
 	error = sockargs_sb(&sbig, SCARG(uap, name), SCARG(uap, namelen));
 	if (error)
 		return error;
+	
+	/* 2. TOCTOU-safe check*/
+	error = pledge_sendit_check(l, (struct sockaddr *)&sbig);
+	if (error)
+		return error;
+
 	return do_sys_connect(l, SCARG(uap, s), (struct sockaddr *)&sbig);
 }
 
@@ -487,23 +490,42 @@ sys_sendto(struct lwp *l, const struct sys_sendto_args *uap,
 		syscallarg(const struct sockaddr *)	to;
 		syscallarg(unsigned int)		tolen;
 	} */
+	struct mbuf *to = NULL;
 	int error;
+	int msg_flags = 0;
 	
-	error = pledge_sendit_check(l, SCARG(uap, to));
-	if (error)
-		return error;
+	if (SCARG(uap, to) != NULL) {
+		error = sockargs(&to, SCARG(uap, to), SCARG(uap, tolen), UIO_USERSPACE, MT_SONAME);
+		if (error)
+			return error;
+
+		/* check on safe copy*/
+		error = pledge_sendit_check(l, mtod(to, struct sockaddr *));
+		if (error) {
+			m_freem(to);
+			return error;
+		}
+
+		/* flag tells that address already in mbuf */
+		msg_flags |= MSG_NAMEMBUF;
+	}
 
 	struct msghdr	msg = {0};
 	struct iovec	aiov;
 
-	msg.msg_name = __UNCONST(SCARG(uap, to)); /* XXXUNCONST kills const */
+	/* 
+	 * if address were copied send pointer on mbuf (to).
+	 * do_sys_sendmsg defer buy itself
+	 */
+	msg.msg_name = to ? (void *)to : NULL; 
 	msg.msg_namelen = SCARG(uap, tolen);
 	msg.msg_iov = &aiov;
 	msg.msg_iovlen = 1;
 	msg.msg_control = NULL;
-	msg.msg_flags = 0;
-	aiov.iov_base = __UNCONST(SCARG(uap, buf)); /* XXXUNCONST kills const */
+	msg.msg_flags = msg_flags;
+	aiov.iov_base = __UNCONST(SCARG(uap, buf));
 	aiov.iov_len = SCARG(uap, len);
+
 	return do_sys_sendmsg(l, SCARG(uap, s), &msg, SCARG(uap, flags),
 	    retval);
 }

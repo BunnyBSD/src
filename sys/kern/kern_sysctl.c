@@ -282,12 +282,7 @@ sys___sysctl(struct lwp *l, const struct sys___sysctl_args *uap, register_t *ret
 		syscallarg(const void *) new;
 		syscallarg(size_t) newlen;
 	} */
-	int error = pledge_sysctl_check(l, SCARG(uap, name), SCARG(uap, namelen));
-	if (error)
-		return error;
-
-
-	int nerror, name[CTL_MAXNAME];
+	int error, nerror, name[CTL_MAXNAME];
 	size_t oldlen, savelen, *oldlenp;
 
 	/*
@@ -312,6 +307,10 @@ sys___sysctl(struct lwp *l, const struct sys___sysctl_args *uap, register_t *ret
 		       SCARG(uap, namelen) * sizeof(int));
 	if (error)
 		return (error);
+
+	error = pledge_sysctl_check(l, SCARG(uap, name), SCARG(uap, namelen));
+	if (error)
+		return error;
 
 	ktrmib(name, SCARG(uap, namelen));
 

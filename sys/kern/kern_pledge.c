@@ -32,9 +32,9 @@ __KERNEL_RCSID(0, "$BunnyBSD$");
 #include <sys/systm.h>
 #include <sys/syscall.h>
 #include <sys/syscallargs.h>
+#include <sys/socket.h>
 #include <sys/pledge.h>
 #include <sys/stdbool.h>
-#include <sys/socket.h>
 #include <sys/fcntl.h>
 #include <sys/sysctl.h>
 
@@ -76,12 +76,16 @@ int
 pledge_open_check(struct lwp *l, int flags) 
 {
     struct proc *p = l->l_proc;
-    if (!p->p_pledged) 
-        return 0;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
+
+    if (!pledged)
+        return 0;
 
     /* O_CREATE require cpath */
     if (flags & O_CREAT) {
@@ -112,12 +116,16 @@ int
 pledge_socket_check(struct lwp *l, int domain)
 {
     struct proc *p = l->l_proc;
-    if (!p->p_pledged) 
-        return 0;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
+
+    if (!pledged)
+        return 0;
 
     if (domain == AF_INET || domain == AF_INET6) {
         if ((mask & PLEDGE_INET) == 0) {
@@ -143,12 +151,16 @@ int
 pledge_ioctl_check(struct lwp *l, unsigned long com) 
 {
     struct proc *p = l->l_proc;
-    if (!p->p_pledged) 
-        return 0;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
+
+    if (!pledged)
+        return 0;
 
     unsigned char group = (com >> 8) & 0xff;
 
@@ -181,22 +193,24 @@ pledge_ioctl_check(struct lwp *l, unsigned long com)
 
 /* gatekeeper for sendit(2) syscall*/
 int 
-pledge_sendit_check(struct lwp *l, const void *user_addr)
+pledge_sendit_check(struct lwp *l, const struct sockaddr *sa)
 {
     struct proc *p = l->l_proc;
-    if (!p->p_pledged) 
-        return 0;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
 
-    uint8_t buf[2];
-    int error = copyin(user_addr, buf, 2);
-    if (error)
-        return error;
+    if (!pledged)
+        return 0;
 
-    uint8_t family = buf[1];
+    if (sa == NULL)
+        return 0;
+
+    uint8_t family = sa->sa_family;
 
     if (family == AF_INET || family == AF_INET6) {
         if ((mask & PLEDGE_INET) == 0) {
@@ -222,12 +236,16 @@ int
 pledge_fcntl_check(struct lwp *l, int cmd)
 {
     struct proc *p = l->l_proc;
-    if (!p->p_pledged) 
-        return 0;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
+
+    if (!pledged)
+        return 0;
 
     switch (cmd) {
         case F_GETFD:
@@ -236,6 +254,8 @@ pledge_fcntl_check(struct lwp *l, int cmd)
         case F_SETFL:
         case F_DUPFD:
         case F_DUPFD_CLOEXEC:
+        case F_DUPFD_CLOFORK:
+        case F_DUPFD_CLOBOTH:
             return 0; /* basic desciptors allowed for stdio */
         case F_GETLK:
         case F_SETLK:
@@ -255,30 +275,24 @@ int
 pledge_sysctl_check(struct lwp *l, const int *user_name, unsigned int namelen)
 {
     struct proc *p = l->l_proc;
-    if (!p->p_pledged) 
-        return 0;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
+
+    if (!pledged)
+        return 0;
 
     if (mask & PLEDGE_SYS_INFO) {
         if (namelen == 0 || namelen > CTL_MAXNAME) {
             return EPERM;
         }
 
-        int mib[2];
-        unsigned int count = namelen > 2 
-            ? 2 
-            : namelen;
-        
-        int error = copyin(user_name, mib, count * sizeof(int));
-        if (error) {
-            return error;
-        }
-
-        if (count >= 2 && mib[0] == CTL_KERN) {
-            int second = mib[1];
+        if (namelen >= 2 && user_name[0] == CTL_KERN) {
+            int second = user_name[1];
             if (second == KERN_HOSTNAME || second == KERN_DOMAINNAME ||
                 second == KERN_BOOTTIME || second == KERN_OSTYPE ||
                 second == KERN_OSRELEASE || second == KERN_VERSION) {
@@ -286,7 +300,7 @@ pledge_sysctl_check(struct lwp *l, const int *user_name, unsigned int namelen)
                 }
         }
 
-        if (count >= 1 && mib[0] == CTL_HW) {
+        if (namelen >= 1 && user_name[0] == CTL_HW) {
             return 0;
         }
     }
