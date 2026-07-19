@@ -70,21 +70,33 @@ pledge_check(struct lwp *l, int code)
 static int
 pledge_parse(const char *promises_str, uint64_t *out_mask)
 {
-    char buf[128];
-    char *p, *token;
     uint64_t mask = 0;
-    bool found;
+    const char *p = promises_str;
 
-    strlcpy(buf, promises_str, sizeof(buf));
-    p = buf;
-
-    while ((token = strsep(&p, " \t\r\n")) != NULL) {
-        if (*token == '\0')
+    while (*p != '\0') {
+        if (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n') {
+            p++;
             continue;
+        }
 
-        found = false;
+        const char *token_start = p;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\r' && *p != '\n') {
+            p++;
+        }
+        size_t token_len = p - token_start;
+
+        if (token_len == 0) {
+            continue;
+        }
+
+        /* searching tok in promises array*/
+        bool found = false;
         for (size_t i = 0; pledge_promises[i].name != NULL; i++) {
-            if (strcmp(token, pledge_promises[i].name) == 0) {
+            /* 
+             * checking len and containments here to exclude collisions 
+             */
+            if (strncmp(token_start, pledge_promises[i].name, token_len) == 0 &&
+                pledge_promises[i].name[token_len] == '\0') {
                 mask |= pledge_promises[i].mask;
                 found = true;
                 break;
@@ -106,7 +118,7 @@ pledge_parse(const char *promises_str, uint64_t *out_mask)
 int
 sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
 {
-    char buf[128];
+    char buf[PLEDGE_MAX_PROMISES_LEN];
     size_t done;
     int error;
     uint64_t new_mask = 0;
