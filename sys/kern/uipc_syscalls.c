@@ -138,6 +138,11 @@ sys_bind(struct lwp *l, const struct sys_bind_args *uap, register_t *retval)
 		syscallarg(unsigned int)		namelen;
 	} */
 	int		error;
+	
+	error = pledge_sendit_check(l, SCARG(uap, name));
+	if (error)
+		return error;
+	
 	struct sockaddr_big sb;
 
 	error = sockargs_sb(&sb, SCARG(uap, name), SCARG(uap, namelen));
@@ -352,6 +357,10 @@ sys_connect(struct lwp *l, const struct sys_connect_args *uap,
 		syscallarg(unsigned int)		namelen;
 	} */
 	int		error;
+	error = pledge_sendit_check(l, SCARG(uap, name));
+	if (error)
+		return error;
+
 	struct sockaddr_big sbig;
 
 	error = sockargs_sb(&sbig, SCARG(uap, name), SCARG(uap, namelen));
@@ -478,6 +487,12 @@ sys_sendto(struct lwp *l, const struct sys_sendto_args *uap,
 		syscallarg(const struct sockaddr *)	to;
 		syscallarg(unsigned int)		tolen;
 	} */
+	int error;
+	
+	error = pledge_sendit_check(l, SCARG(uap, to));
+	if (error)
+		return error;
+
 	struct msghdr	msg = {0};
 	struct iovec	aiov;
 

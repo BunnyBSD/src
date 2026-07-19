@@ -34,7 +34,9 @@ __KERNEL_RCSID(0, "$BunnyBSD$");
 #include <sys/syscallargs.h>
 #include <sys/pledge.h>
 #include <sys/stdbool.h>
+#include <sys/socket.h>
 #include <sys/fcntl.h>
+#include <sys/sysctl.h>
 
 #ifdef PLEDGE
 
@@ -180,17 +182,117 @@ pledge_ioctl_check(struct lwp *l, unsigned long com)
 /* gatekeeper for sendit(2) syscall*/
 int 
 pledge_sendit_check(struct lwp *l, const void *user_addr)
-{}
+{
+    struct proc *p = l->l_proc;
+    if (!p->p_pledged) 
+        return 0;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
+
+    uint8_t buf[2];
+    int error = copyin(user_addr, buf, 2);
+    if (error)
+        return error;
+
+    uint8_t family = buf[1];
+
+    if (family == AF_INET || family == AF_INET6) {
+        if ((mask & PLEDGE_INET) == 0) {
+            return EPERM;
+        }
+    }
+    
+    else if (family == AF_UNIX) {
+        if ((mask & PLEDGE_UNIX) == 0) {
+            return EPERM;
+        }
+    }
+
+    else {
+        return EPERM;
+    }
+
+    return 0;
+}
 
 /* gatekeeper for fcntl(2) syscall*/
 int
 pledge_fcntl_check(struct lwp *l, int cmd)
-{}
+{
+    struct proc *p = l->l_proc;
+    if (!p->p_pledged) 
+        return 0;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
+
+    switch (cmd) {
+        case F_GETFD:
+        case F_SETFD:
+        case F_GETFL:
+        case F_SETFL:
+        case F_DUPFD:
+        case F_DUPFD_CLOEXEC:
+            return 0; /* basic desciptors allowed for stdio */
+        case F_GETLK:
+        case F_SETLK:
+        case F_SETLKW:
+            /* require PLEDGE_FLOCK for locking files*/
+            if ((mask & PLEDGE_FLOCK) == 0) {
+                return EPERM;
+            }
+            return 0;
+        default:
+            return EPERM;
+    }
+}
 
 /* gatekeeper for sysctl(2) syscall*/
 int
-pledge_sysctl_check(struct lwp *l, unsigned long *user_name, unsigned int namelen)
-{}
+pledge_sysctl_check(struct lwp *l, const int *user_name, unsigned int namelen)
+{
+    struct proc *p = l->l_proc;
+    if (!p->p_pledged) 
+        return 0;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
+
+    if (mask & PLEDGE_SYS_INFO) {
+        if (namelen == 0 || namelen > CTL_MAXNAME) {
+            return EPERM;
+        }
+
+        int mib[2];
+        unsigned int count = namelen > 2 
+            ? 2 
+            : namelen;
+        
+        int error = copyin(user_name, mib, count * sizeof(int));
+        if (error) {
+            return error;
+        }
+
+        if (count >= 2 && mib[0] == CTL_KERN) {
+            int second = mib[1];
+            if (second == KERN_HOSTNAME || second == KERN_DOMAINNAME ||
+                second == KERN_BOOTTIME || second == KERN_OSTYPE ||
+                second == KERN_OSRELEASE || second == KERN_VERSION) {
+                    return 0;
+                }
+        }
+
+        if (count >= 1 && mib[0] == CTL_HW) {
+            return 0;
+        }
+    }
+
+    return EPERM;
+}
 
 /*
  * parses pledges 0 on success EINVAL if unknown promise
