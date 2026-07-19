@@ -268,7 +268,7 @@ def action_export():
             print(f"Error reading '{MAP_FILE}': {e}", file=sys.stderr)
             sys.exit(1)
     # Exclude system reserved keywords (bypass, forbidden, error) from dynamic bit generation
-    promises = [k for k in raw_map.keys() if k not in ["bypass", "forbidden", "error"]]
+    promises = [k for k in raw_map.keys() if k not in ["bypass", "forbidden", "error", "always"]]
     promises.sort()  # Keep defines sorted deterministically
 
     dynamic_defines = []
