@@ -70,6 +70,36 @@ def load_pledge_map():
 
     return forward_map
 
+def get_sys_const(entry):
+    """
+    Reconstructs the exact NetBSD C macro name for the system call constant.
+    Handles compatibility prefixes, aliases, and triple-underscore (___) stripping.
+    """
+    sc_type = entry["type"]
+    name = entry["name"]
+    alias = entry.get("alias", "")
+    compat = entry.get("compat", "")
+
+    # Reconstruct the base name following makesyscalls.sh rules
+    if alias:
+        base = alias
+    else:
+        if compat:
+            # If compat suffix exists, NetBSD's makesyscalls.sh always prepends "__"
+            # due to triple-underscore '___' stripping (e.g. sys___socket30 -> __socket30)
+            base = f"__{name}{compat}"
+        else:
+            base = name
+
+    # Construct the prefix based on compatibility options
+    if sc_type in ["STD", "NOARGS", "INDIR", "NOERR"]:
+        return f"SYS_{base}"
+    elif sc_type.startswith("COMPAT_"):
+        ver = sc_type.lower()  # e.g., "compat_50"
+        return f"SYS_{ver}_{base}"
+    else:
+        return f"SYS_{base}"
+
 def action_import(master_path):
     """
     Parses a raw syscalls.master file and outputs a clean, structured syscalls.json.
@@ -356,6 +386,7 @@ __END_DECLS
     # 3. Regenerate sys_pledge.c
     with open(c_path, "w", encoding="utf-8") as f_pledge:
         f_pledge.write("/* Generated from syscalls.json -- DO NOT EDIT */\n\n")
+        f_pledge.write("#include <sys/param.h>\n")  # Fixed NULL declaration
         f_pledge.write("#include <sys/types.h>\n")
         f_pledge.write("#include <sys/syscall.h>\n")
         f_pledge.write("#include <sys/pledge.h>\n\n")
@@ -365,7 +396,6 @@ __END_DECLS
             if entry.get("type") == "raw" or "pledge" not in entry:
                 continue
 
-            name = entry["name"]
             pledge_list = entry["pledge"]
             if not pledge_list:
                 continue
@@ -373,7 +403,9 @@ __END_DECLS
             macros = [f"PLEDGE_{p.upper()}" for p in pledge_list]
             mask_expr = " | ".join(macros)
 
-            sys_const = f"SYS_{name}"
+            # Reconstruct the precise NetBSD syscall macro name (e.g. SYS_compat_43_oaccept)
+            sys_const = get_sys_const(entry)
+            
             f_pledge.write(f"#ifdef {sys_const}\n")
             f_pledge.write(f"    [{sys_const}] = {mask_expr},\n")
             f_pledge.write(f"#endif\n")
