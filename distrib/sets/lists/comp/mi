@@ -22871,6 +22871,7 @@
 ./usr/share/man/man2/pathconf.2			comp-c-man		.man
 ./usr/share/man/man2/pipe.2			comp-c-man		.man
 ./usr/share/man/man2/pipe2.2			comp-c-man		.man
+./usr/share/man/man2/pledge.2                  comp-c-man              .man
 ./usr/share/man/man2/pmc_control.2		comp-obsolete		obsolete
 ./usr/share/man/man2/pmc_get_info.2		comp-obsolete		obsolete
 ./usr/share/man/man2/poll.2			comp-c-man		.man
