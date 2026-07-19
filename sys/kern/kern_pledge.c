@@ -36,71 +36,110 @@ __KERNEL_RCSID(0, "$BunnyBSD$");
 #include <sys/stdbool.h>
 
 #ifdef PLEDGE
+
+extern const uint64_t pledge_syscalls[SYS_NSYSENT];
+
 /*
- * Helper to check (obviosly)
- * TODO: when building good pledge (Not POC) rewrite it completely and nicely
+ * Helper to check
  */
 
 bool
-pledge_check(struct lwp *l, int code) {
+pledge_check(struct lwp *l, int code)
+{
+    if (code < 0 || code >= SYS_NSYSENT)
+        return false;
+
+    uint64_t pledge = pledge_syscalls[code];
     uint64_t mask = l->l_proc->p_pledge;
 
-    if (code == SYS_exit || code == SYS_pledge)
+    if (pledge == PLEDGE_ALWAYS)
         return true;
 
-    if (mask & PLEDGE_STDIO) {
-        if (code == SYS_read || code == SYS_write || code == SYS_close)
-			return true;
-    }
+    if (mask == 0)
+        return false;
 
-   	if (mask & PLEDGE_RPATH) {
-		if (code == SYS_open ||
-		    code == SYS___stat50 ||
-		    code == SYS___fstat50 ||
-		    code == SYS___lstat50)
-			return true;
-	}
+    if ((mask & pledge) != 0)
+        return true;
 
     return false;
+}
+
+/*
+ * parses pledges 0 on success EINVAL if unknown promise
+ */
+static int
+pledge_parse(const char *promises_str, uint64_t *out_mask)
+{
+    char buf[128];
+    char *p, *token;
+    uint64_t mask = 0;
+    bool found;
+
+    strlcpy(buf, promises_str, sizeof(buf));
+    p = buf;
+
+    while ((token = strsep(&p, " \t\r\n")) != NULL) {
+        if (*token == '\0')
+            continue;
+
+        found = false;
+        for (size_t i = 0; pledge_promises[i].name != NULL; i++) {
+            if (strcmp(token, pledge_promises[i].name) == 0) {
+                mask |= pledge_promises[i].mask;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            return EINVAL;
+        }
+    }
+
+    *out_mask = mask;
+    return 0;
 }
 
 /*
  * pledge(2)
  */
 int
-sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval) {
+sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
+{
     char buf[128];
     size_t done;
     int error;
-
-    error = copyinstr(SCARG(uap, promises), buf, sizeof(buf), &done);
-    if (error)
-        return error;
-
-    /*
-     * TODO: rewrite parser after POC
-     */
     uint64_t new_mask = 0;
-    if (strstr(buf, "error") != NULL)
-        new_mask |= PLEDGE_ERROR;
 
-    if (strstr(buf, "stdio") != NULL)
-        new_mask |= PLEDGE_STDIO;
+    if (SCARG(uap, promises) != NULL) {
+        error = copyinstr(SCARG(uap, promises), buf, sizeof(buf), &done);
+        if (error)
+            return error;
 
-    if (strstr(buf, "rpath") != NULL)
-        new_mask |= PLEDGE_RPATH;
+        error = pledge_parse(buf, &new_mask);
+        if (error)
+            return error;
 
-    if (l->l_proc->p_pledged) {
-        if ((new_mask & ~l->l_proc->p_pledge) != 0) {
-            return EPERM;
+        // proc can only drop pledges
+        if (l->l_proc->p_pledged) {
+            if ((new_mask & ~l->l_proc->p_pledge) != 0) {
+                return EPERM;
+            }
         }
+
+        l->l_proc->p_pledge = new_mask;
+        l->l_proc->p_pledged = true;
     }
 
-    l->l_proc->p_pledge = new_mask;
-    l->l_proc->p_pledged = true;
+    if (SCARG(uap, execpromises) != NULL) {
+        /*
+         * TODO: execpledges
+         */
+    }
 
     return 0;
 }
+
 #else /* !PLEDGE */
 
 /*
