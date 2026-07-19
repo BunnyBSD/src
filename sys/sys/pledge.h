@@ -74,7 +74,7 @@ struct sockaddr;
 #ifdef _KERNEL
 #ifdef PLEDGE
 
-bool pledge_check(struct lwp *, int);
+int pledge_check(struct lwp *, int);
 
 int pledge_open_check(struct lwp *l, int flags);
 int pledge_socket_check(struct lwp *l, int domain);
@@ -99,7 +99,7 @@ extern const struct pledge_promise pledge_promises[];
 #define pledge_sendit_check(l, sa)            0
 #define pledge_fcntl_check(l, cmd)            0
 #define pledge_sysctl_check(l, name, namelen) 0
-#endif /* PLEDGE */
+#endif /* PLEDGE*/
 #else /* _KERNEL */
 
 #include <sys/cdefs.h>

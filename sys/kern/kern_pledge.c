@@ -32,6 +32,7 @@ __KERNEL_RCSID(0, "$BunnyBSD$");
 #include <sys/systm.h>
 #include <sys/syscall.h>
 #include <sys/syscallargs.h>
+#include <sys/signalvar.h>
 #include <sys/socket.h>
 #include <sys/pledge.h>
 #include <sys/stdbool.h>
@@ -46,29 +47,37 @@ extern const uint64_t pledge_syscalls[SYS_NSYSENT];
  * Helper to check
  */
 
-bool
+int 
 pledge_check(struct lwp *l, int code)
 {
-    if (code < 0 || code >= SYS_NSYSENT)
-        return false;
-
-    uint64_t pledge = pledge_syscalls[code];
     struct proc *p = l->l_proc;
+    bool pledged;
+    uint64_t mask;
 
     mutex_enter(p->p_lock);
-    uint64_t mask = p->p_pledge;
+    pledged = p->p_pledged;
+    mask = p->p_pledge;
     mutex_exit(p->p_lock);
 
+    if (!pledged)
+        return 0;
+
+    if (code < 0 || code >= SYS_NSYSENT)
+        return EPERM;
+
+    uint64_t pledge = pledge_syscalls[code];
     if (pledge == PLEDGE_ALWAYS)
-        return true;
+        return 0;
 
-    if (mask == 0)
-        return false;
+    if (mask == 0 || (mask & pledge) == 0) {
+        if (mask & PLEDGE_ERROR) {
+            return EPERM;
+        }
+        sigexit(l, SIGABRT);
+    }
 
-    if ((mask & pledge) != 0)
-        return true;
 
-    return false;
+    return 0;
 }
 
 /* gatekeeper for open(2) with pledge */

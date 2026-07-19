@@ -326,7 +326,7 @@ struct sockaddr;
 #ifdef _KERNEL
 #ifdef PLEDGE
 
-bool pledge_check(struct lwp *, int);
+int pledge_check(struct lwp *, int);
 
 int pledge_open_check(struct lwp *l, int flags);
 int pledge_socket_check(struct lwp *l, int domain);

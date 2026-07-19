@@ -74,14 +74,9 @@ sy_invoke(const struct sysent *sy, struct lwp *l, const void *uap,
 	register_t *rval, int code)
 {
 #ifdef PLEDGE
-    if (l->l_proc->p_pledged) {
-        if (!pledge_check(l, code)) {
-            if (l->l_proc->p_pledge & PLEDGE_ERROR) {
-				return EPERM;
-			}
-            sigexit(l, SIGABRT);
-        }
-    }
+	int pledge_err = pledge_check(l, code);
+	if (pledge_err) 
+		return pledge_err;
 #endif
 	const bool do_trace = l->l_proc->p_trace_enabled &&
 	    (sy->sy_flags & SYCALL_INDIRECT) == 0;
