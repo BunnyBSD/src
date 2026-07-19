@@ -308,7 +308,7 @@
     "name": "fork",
     "args": "void",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -341,7 +341,6 @@
     "name": "open",
     "args": "const char *path, int flags, ... mode_t mode",
     "pledge": [
-      "inet",
       "rpath",
       "wpath",
       "cpath"
@@ -366,7 +365,7 @@
     "name": "wait4",
     "args": "pid_t pid, int *status, int options, struct rusage50 *rusage",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -507,7 +506,7 @@
     "name": "getpid_with_ppid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -536,7 +535,7 @@
     "name": "setuid",
     "args": "uid_t uid",
     "pledge": [
-      "id"
+      "identity_set"
     ]
   },
   {
@@ -548,7 +547,7 @@
     "name": "getuid_with_euid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -559,7 +558,7 @@
     "name": "geteuid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -684,7 +683,7 @@
     "name": "sync",
     "args": "void",
     "pledge": [
-      "stdio"
+      "fs_sync"
     ]
   },
   {
@@ -694,7 +693,7 @@
     "name": "kill",
     "args": "pid_t pid, int signum",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -706,7 +705,7 @@
     "name": "stat",
     "args": "const char *path, struct stat43 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -717,7 +716,7 @@
     "name": "getppid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -729,7 +728,7 @@
     "name": "lstat",
     "args": "const char *path, struct stat43 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -762,7 +761,7 @@
     "name": "getegid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -791,7 +790,7 @@
     "name": "sigaction",
     "args": "int signum, const struct sigaction13 *nsa, struct sigaction13 *osa",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -803,7 +802,7 @@
     "name": "getgid_with_egid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -815,7 +814,7 @@
     "name": "sigprocmask",
     "args": "int how, int mask",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -853,7 +852,7 @@
     "name": "sigpending",
     "args": "void",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -865,7 +864,7 @@
     "name": "sigaltstack",
     "args": "const struct sigaltstack13 *nss, struct sigaltstack13 *oss",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -940,7 +939,7 @@
     "name": "umask",
     "args": "mode_t newmask",
     "pledge": [
-      "stdio"
+      "fattr"
     ]
   },
   {
@@ -961,7 +960,7 @@
     "name": "fstat",
     "args": "int fd, struct stat43 *sb",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -983,7 +982,7 @@
     "name": "getpagesize",
     "args": "void",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -994,7 +993,7 @@
     "name": "msync",
     "args": "void *addr, size_t len",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -1008,7 +1007,7 @@
     "name": "vfork",
     "args": "void",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -1040,7 +1039,7 @@
     "name": "mmap",
     "args": "void *addr, size_t len, int prot, int flags, int fd, long pos",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -1059,7 +1058,7 @@
     "name": "munmap",
     "args": "void *addr, size_t len",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -1069,7 +1068,7 @@
     "name": "mprotect",
     "args": "void *addr, size_t len, int prot",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -1079,7 +1078,7 @@
     "name": "madvise",
     "args": "void *addr, size_t len, int behav",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -1099,7 +1098,7 @@
     "name": "mincore",
     "args": "void *addr, size_t len, char *vec",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -1110,7 +1109,7 @@
     "name": "getgroups",
     "args": "int gidsetsize, gid_t *gidset",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -1121,7 +1120,7 @@
     "name": "setgroups",
     "args": "int gidsetsize, const gid_t *gidset",
     "pledge": [
-      "stdio"
+      "identity_set"
     ]
   },
   {
@@ -1132,7 +1131,7 @@
     "name": "getpgrp",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -1143,7 +1142,7 @@
     "name": "setpgid",
     "args": "pid_t pid, pid_t pgid",
     "pledge": [
-      "stdio"
+      "process_meta"
     ]
   },
   {
@@ -1154,7 +1153,7 @@
     "name": "setitimer",
     "args": "int which, const struct itimerval50 *itv, struct itimerval50 *oitv",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -1166,7 +1165,7 @@
     "name": "wait",
     "args": "void",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -1187,7 +1186,7 @@
     "name": "getitimer",
     "args": "int which, struct itimerval50 *itv",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -1199,7 +1198,7 @@
     "name": "gethostname",
     "args": "char *hostname, u_int len",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -1221,7 +1220,7 @@
     "name": "getdtablesize",
     "args": "void",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -1243,7 +1242,7 @@
     "name": "getrandom",
     "args": "void *buf, size_t buflen, unsigned int flags",
     "pledge": [
-      "stdio"
+      "entropy"
     ]
   },
   {
@@ -1254,6 +1253,7 @@
     "name": "fcntl",
     "args": "int fd, int cmd, ... void *arg",
     "pledge": [
+      "stdio",
       "flock"
     ]
   },
@@ -1266,7 +1266,7 @@
     "name": "select",
     "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, struct timeval50 *tv",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -1292,7 +1292,7 @@
     "name": "setpriority",
     "args": "int which, id_t who, int prio",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -1339,7 +1339,7 @@
     "name": "getpriority",
     "args": "int which, id_t who",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -1377,7 +1377,7 @@
     "name": "sigreturn",
     "args": "struct sigcontext13 *sigcntxp",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -1430,7 +1430,7 @@
     "name": "sigvec",
     "args": "int signum, struct sigvec *nsv, struct sigvec *osv",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -1442,7 +1442,7 @@
     "name": "sigblock",
     "args": "int mask",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -1454,7 +1454,7 @@
     "name": "sigsetmask",
     "args": "int mask",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -1466,7 +1466,7 @@
     "name": "sigsuspend",
     "args": "int mask",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -1478,7 +1478,7 @@
     "name": "sigstack",
     "args": "struct sigstack *nss, struct sigstack *oss",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -1520,7 +1520,7 @@
     "name": "gettimeofday",
     "args": "struct timeval50 *tp, void *tzp",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -1531,7 +1531,7 @@
     "name": "getrusage",
     "args": "int who, struct rusage50 *rusage",
     "pledge": [
-      "stdio"
+      "process_meta"
     ]
   },
   {
@@ -1581,7 +1581,7 @@
     "name": "settimeofday",
     "args": "const struct timeval50 *tv, const void *tzp",
     "pledge": [
-      "stdio"
+      "time_set"
     ]
   },
   {
@@ -1627,7 +1627,7 @@
     "name": "setreuid",
     "args": "uid_t ruid, uid_t euid",
     "pledge": [
-      "id"
+      "identity_set"
     ]
   },
   {
@@ -1638,7 +1638,7 @@
     "name": "setregid",
     "args": "gid_t rgid, gid_t egid",
     "pledge": [
-      "id"
+      "identity_set"
     ]
   },
   {
@@ -1780,7 +1780,7 @@
     "name": "adjtime",
     "args": "const struct timeval50 *delta, struct timeval50 *olddelta",
     "pledge": [
-      "stdio"
+      "time_set"
     ]
   },
   {
@@ -1805,7 +1805,7 @@
     "name": "gethostid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -1827,7 +1827,7 @@
     "name": "getrlimit",
     "args": "int which, struct orlimit *rlp",
     "pledge": [
-      "stdio"
+      "process_meta"
     ]
   },
   {
@@ -1839,7 +1839,7 @@
     "name": "setrlimit",
     "args": "int which, const struct orlimit *rlp",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -1851,7 +1851,7 @@
     "name": "killpg",
     "args": "int pgid, int signum",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -1862,7 +1862,7 @@
     "name": "setsid",
     "args": "void",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -2023,7 +2023,7 @@
     "name": "uname",
     "args": "struct outsname *name",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -2033,7 +2033,7 @@
     "name": "sysarch",
     "args": "int op, void *parms",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -2043,7 +2043,7 @@
     "name": "__futex",
     "args": "int *uaddr, int op, int val, const struct timespec *timeout, int *uaddr2, int val2, int val3",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2053,7 +2053,7 @@
     "name": "__futex_set_robust_list",
     "args": "void *head, size_t len",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2063,7 +2063,7 @@
     "name": "__futex_get_robust_list",
     "args": "lwpid_t lwpid, void **headp, size_t *lenp",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2230,7 +2230,7 @@
     "name": "timerfd_create",
     "args": "clockid_t clock_id, int flags",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2240,7 +2240,7 @@
     "name": "timerfd_settime",
     "args": "int fd, int flags, const struct itimerspec *new_value, struct itimerspec *old_value",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2250,7 +2250,7 @@
     "name": "timerfd_gettime",
     "args": "int fd, struct itimerspec *curr_value",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2273,7 +2273,7 @@
     "name": "setgid",
     "args": "gid_t gid",
     "pledge": [
-      "id"
+      "identity_set"
     ]
   },
   {
@@ -2284,7 +2284,7 @@
     "name": "setegid",
     "args": "gid_t egid",
     "pledge": [
-      "id"
+      "identity_set"
     ]
   },
   {
@@ -2295,7 +2295,7 @@
     "name": "seteuid",
     "args": "uid_t euid",
     "pledge": [
-      "id"
+      "identity_set"
     ]
   },
   {
@@ -2343,7 +2343,7 @@
     "name": "stat",
     "args": "const char *path, struct stat12 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -2355,7 +2355,7 @@
     "name": "fstat",
     "args": "int fd, struct stat12 *sb",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -2367,7 +2367,7 @@
     "name": "lstat",
     "args": "const char *path, struct stat12 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -2389,7 +2389,7 @@
     "name": "fpathconf",
     "args": "int fd, int name",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -2412,7 +2412,7 @@
     "name": "getrlimit",
     "args": "int which, struct rlimit *rlp",
     "pledge": [
-      "stdio"
+      "process_meta"
     ]
   },
   {
@@ -2423,7 +2423,7 @@
     "name": "setrlimit",
     "args": "int which, const struct rlimit *rlp",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -2444,7 +2444,7 @@
     "name": "mmap",
     "args": "void *addr, size_t len, int prot, int flags, int fd, long PAD, off_t pos",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -2496,7 +2496,7 @@
     "name": "__sysctl",
     "args": "const int *name, u_int namelen, void *oldv, size_t *oldlenp, const void *newv, size_t newlen",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -2545,7 +2545,7 @@
     "name": "getpgid",
     "args": "pid_t pid",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -2565,7 +2565,7 @@
     "name": "poll",
     "args": "struct pollfd *fds, u_int nfds, int timeout",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -2767,7 +2767,7 @@
     "name": "clock_gettime",
     "args": "clockid_t clock_id, struct timespec50 *tp",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -2778,7 +2778,7 @@
     "name": "clock_settime",
     "args": "clockid_t clock_id, const struct timespec50 *tp",
     "pledge": [
-      "stdio"
+      "time_set"
     ]
   },
   {
@@ -2789,7 +2789,7 @@
     "name": "clock_getres",
     "args": "clockid_t clock_id, struct timespec50 *tp",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -2800,7 +2800,7 @@
     "name": "timer_create",
     "args": "clockid_t clock_id, struct sigevent *evp, timer_t *timerid",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2811,7 +2811,7 @@
     "name": "timer_delete",
     "args": "timer_t timerid",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2822,7 +2822,7 @@
     "name": "timer_settime",
     "args": "timer_t timerid, int flags, const struct itimerspec50 *value, struct itimerspec50 *ovalue",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2833,7 +2833,7 @@
     "name": "timer_gettime",
     "args": "timer_t timerid, struct itimerspec50 *value",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2844,7 +2844,7 @@
     "name": "timer_getoverrun",
     "args": "timer_t timerid",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2867,7 +2867,7 @@
     "name": "nanosleep",
     "args": "const struct timespec50 *rqtp, struct timespec50 *rmtp",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -2905,7 +2905,7 @@
     "name": "__sigtimedwait",
     "args": "const sigset_t *set, siginfo_t *info, struct timespec50 *timeout",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -2914,9 +2914,7 @@
     "return": "int",
     "name": "sigqueueinfo",
     "args": "pid_t pid, const siginfo_t *info",
-    "pledge": [
-      "stdio"
-    ]
+    "pledge": []
   },
   {
     "num": 246,
@@ -2936,7 +2934,7 @@
     "name": "_ksem_init",
     "args": "unsigned int value, intptr_t *idp",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2948,7 +2946,7 @@
     "name": "_ksem_open",
     "args": "const char *name, int oflag, mode_t mode, unsigned int value, intptr_t *idp",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2960,7 +2958,7 @@
     "name": "_ksem_unlink",
     "args": "const char *name",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2972,7 +2970,7 @@
     "name": "_ksem_close",
     "args": "intptr_t id",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2984,7 +2982,7 @@
     "name": "_ksem_post",
     "args": "intptr_t id",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -2996,7 +2994,7 @@
     "name": "_ksem_wait",
     "args": "intptr_t id",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -3008,7 +3006,7 @@
     "name": "_ksem_trywait",
     "args": "intptr_t id",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -3020,7 +3018,7 @@
     "name": "_ksem_getvalue",
     "args": "intptr_t id, unsigned int *value",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -3032,7 +3030,7 @@
     "name": "_ksem_destroy",
     "args": "intptr_t id",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -3044,7 +3042,7 @@
     "name": "_ksem_timedwait",
     "args": "intptr_t id, const struct timespec *abstime",
     "pledge": [
-      "stdio"
+      "synchronization"
     ]
   },
   {
@@ -3144,7 +3142,7 @@
     "name": "eventfd",
     "args": "unsigned int val, int flags",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -3191,9 +3189,7 @@
     "return": "int",
     "name": "minherit",
     "args": "void *addr, size_t len, int inherit",
-    "pledge": [
-      "stdio"
-    ]
+    "pledge": []
   },
   {
     "num": 274,
@@ -3237,7 +3233,7 @@
     "name": "msync",
     "args": "void *addr, size_t len, int flags",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -3249,7 +3245,7 @@
     "name": "stat",
     "args": "const char *path, struct stat13 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -3261,7 +3257,7 @@
     "name": "fstat",
     "args": "int fd, struct stat13 *sb",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -3273,7 +3269,7 @@
     "name": "lstat",
     "args": "const char *path, struct stat13 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -3284,7 +3280,7 @@
     "name": "sigaltstack",
     "args": "const stack_t *nss, stack_t *oss",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3295,7 +3291,7 @@
     "name": "vfork",
     "args": "void",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -3339,7 +3335,7 @@
     "name": "getsid",
     "args": "pid_t pid",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -3349,7 +3345,7 @@
     "name": "__clone",
     "args": "int flags, void *stack",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -3392,7 +3388,7 @@
     "name": "sigaction",
     "args": "int signum, const struct sigaction *nsa, struct sigaction *osa",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3403,7 +3399,7 @@
     "name": "sigpending",
     "args": "sigset_t *set",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3414,7 +3410,7 @@
     "name": "sigprocmask",
     "args": "int how, const sigset_t *set, sigset_t *oset",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3425,7 +3421,7 @@
     "name": "sigsuspend",
     "args": "const sigset_t *set",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3437,7 +3433,7 @@
     "name": "sigreturn",
     "args": "struct sigcontext *sigcntxp",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3540,7 +3536,7 @@
     "name": "issetugid",
     "args": "void",
     "pledge": [
-      "stdio"
+      "identity_get"
     ]
   },
   {
@@ -3559,7 +3555,7 @@
     "name": "getcontext",
     "args": "struct __ucontext *ucp",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3569,7 +3565,7 @@
     "name": "setcontext",
     "args": "const struct __ucontext *ucp",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3579,7 +3575,7 @@
     "name": "_lwp_create",
     "args": "const struct __ucontext *ucp, u_long flags, lwpid_t *new_lwp",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3589,7 +3585,7 @@
     "name": "_lwp_exit",
     "args": "void",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3599,7 +3595,7 @@
     "name": "_lwp_self",
     "args": "void",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3609,7 +3605,7 @@
     "name": "_lwp_wait",
     "args": "lwpid_t wait_for, lwpid_t *departed",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3619,7 +3615,7 @@
     "name": "_lwp_suspend",
     "args": "lwpid_t target",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3629,7 +3625,7 @@
     "name": "_lwp_continue",
     "args": "lwpid_t target",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3639,7 +3635,7 @@
     "name": "_lwp_wakeup",
     "args": "lwpid_t target",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3649,7 +3645,7 @@
     "name": "_lwp_getprivate",
     "args": "void",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3659,7 +3655,7 @@
     "name": "_lwp_setprivate",
     "args": "void *ptr",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3669,7 +3665,7 @@
     "name": "_lwp_kill",
     "args": "lwpid_t target, int signo",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3679,7 +3675,7 @@
     "name": "_lwp_detach",
     "args": "lwpid_t target",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3690,7 +3686,7 @@
     "name": "_lwp_park",
     "args": "const struct timespec50 *ts, lwpid_t unpark, const void *hint, const void *unparkhint",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3700,7 +3696,7 @@
     "name": "_lwp_unpark",
     "args": "lwpid_t target, const void *hint",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3710,7 +3706,7 @@
     "name": "_lwp_unpark_all",
     "args": "const lwpid_t *targets, size_t ntargets, const void *hint",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3720,7 +3716,7 @@
     "name": "_lwp_setname",
     "args": "lwpid_t target, const char *name",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3730,7 +3726,7 @@
     "name": "_lwp_getname",
     "args": "lwpid_t target, char *name, size_t len",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3740,7 +3736,7 @@
     "name": "_lwp_ctl",
     "args": "int features, struct lwpctl **address",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -3857,7 +3853,7 @@
     "name": "__sigaction_sigtramp",
     "args": "int signum, const struct sigaction *nsa, struct sigaction *osa, const void *tramp, int vers",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -3876,9 +3872,7 @@
     "return": "int",
     "name": "rasctl",
     "args": "void *addr, size_t len, int op",
-    "pledge": [
-      "stdio"
-    ]
+    "pledge": []
   },
   {
     "num": 344,
@@ -3888,7 +3882,7 @@
     "name": "kqueue",
     "args": "void",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -3900,7 +3894,7 @@
     "name": "kevent",
     "args": "int fd, const struct kevent100 *changelist, size_t nchanges, struct kevent100 *eventlist, size_t nevents, const struct timespec50 *timeout",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -3918,7 +3912,7 @@
     "name": "_sched_setparam",
     "args": "pid_t pid, lwpid_t lid, int policy, const struct sched_param *params",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -3928,7 +3922,7 @@
     "name": "_sched_getparam",
     "args": "pid_t pid, lwpid_t lid, int *policy, struct sched_param *params",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -3938,7 +3932,7 @@
     "name": "_sched_setaffinity",
     "args": "pid_t pid, lwpid_t lid, size_t size, const cpuset_t *cpuset",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -3948,7 +3942,7 @@
     "name": "_sched_getaffinity",
     "args": "pid_t pid, lwpid_t lid, size_t size, cpuset_t *cpuset",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -3958,7 +3952,7 @@
     "name": "sched_yield",
     "args": "void",
     "pledge": [
-      "stdio"
+      "process_meta"
     ]
   },
   {
@@ -3968,7 +3962,7 @@
     "name": "_sched_protect",
     "args": "int priority",
     "pledge": [
-      "proc"
+      "process_meta"
     ]
   },
   {
@@ -4001,7 +3995,7 @@
     "name": "uuidgen",
     "args": "struct uuid *store, int count",
     "pledge": [
-      "stdio"
+      "sys_info"
     ]
   },
   {
@@ -4198,7 +4192,7 @@
     "name": "pselect",
     "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, const struct timespec50 *ts, const sigset_t *mask",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -4210,7 +4204,7 @@
     "name": "pollts",
     "args": "struct pollfd *fds, u_int nfds, const struct timespec50 *ts, const sigset_t *mask",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -4355,7 +4349,7 @@
     "name": "stat",
     "args": "const char *path, struct stat30 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -4368,7 +4362,7 @@
     "name": "fstat",
     "args": "int fd, struct stat30 *sb",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -4381,7 +4375,7 @@
     "name": "lstat",
     "args": "const char *path, struct stat30 *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -4493,7 +4487,7 @@
     "name": "aio_cancel",
     "args": "int fildes, struct aiocb *aiocbp",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4505,7 +4499,7 @@
     "name": "aio_error",
     "args": "const struct aiocb *aiocbp",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4517,7 +4511,7 @@
     "name": "aio_fsync",
     "args": "int op, struct aiocb *aiocbp",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4529,7 +4523,7 @@
     "name": "aio_read",
     "args": "struct aiocb *aiocbp",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4541,7 +4535,7 @@
     "name": "aio_return",
     "args": "struct aiocb *aiocbp",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4552,7 +4546,7 @@
     "name": "aio_suspend",
     "args": "const struct aiocb *const *list, int nent, const struct timespec50 *timeout",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4564,7 +4558,7 @@
     "name": "aio_write",
     "args": "struct aiocb *aiocbp",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4576,7 +4570,7 @@
     "name": "lio_listio",
     "args": "int mode, struct aiocb *const *list, int nent, struct sigevent *sig",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4616,7 +4610,7 @@
     "name": "mremap",
     "args": "void *old_address, size_t old_size, void *new_address, size_t new_size, int flags",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -4680,7 +4674,7 @@
     "name": "select",
     "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, struct timeval *tv",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -4692,7 +4686,7 @@
     "name": "gettimeofday",
     "args": "struct timeval *tp, void *tzp",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -4704,7 +4698,7 @@
     "name": "settimeofday",
     "args": "const struct timeval *tv, const void *tzp",
     "pledge": [
-      "stdio"
+      "time_set"
     ]
   },
   {
@@ -4728,7 +4722,7 @@
     "name": "adjtime",
     "args": "const struct timeval *delta, struct timeval *olddelta",
     "pledge": [
-      "stdio"
+      "time_set"
     ]
   },
   {
@@ -4774,7 +4768,7 @@
     "name": "setitimer",
     "args": "int which, const struct itimerval *itv, struct itimerval *oitv",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -4786,7 +4780,7 @@
     "name": "getitimer",
     "args": "int which, struct itimerval *itv",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -4798,7 +4792,7 @@
     "name": "clock_gettime",
     "args": "clockid_t clock_id, struct timespec *tp",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -4810,7 +4804,7 @@
     "name": "clock_settime",
     "args": "clockid_t clock_id, const struct timespec *tp",
     "pledge": [
-      "stdio"
+      "time_set"
     ]
   },
   {
@@ -4822,7 +4816,7 @@
     "name": "clock_getres",
     "args": "clockid_t clock_id, struct timespec *tp",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -4834,7 +4828,7 @@
     "name": "nanosleep",
     "args": "const struct timespec *rqtp, struct timespec *rmtp",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -4845,7 +4839,7 @@
     "name": "__sigtimedwait",
     "args": "const sigset_t *set, siginfo_t *info, struct timespec *timeout",
     "pledge": [
-      "stdio"
+      "signal"
     ]
   },
   {
@@ -4876,7 +4870,7 @@
     "name": "_lwp_park",
     "args": "const struct timespec *ts, lwpid_t unpark, const void *hint, const void *unparkhint",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -4889,7 +4883,7 @@
     "name": "kevent",
     "args": "int fd, const struct kevent100 *changelist, size_t nchanges, struct kevent100 *eventlist, size_t nevents, const struct timespec *timeout",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -4901,7 +4895,7 @@
     "name": "pselect",
     "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, const struct timespec *ts, const sigset_t *mask",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -4913,7 +4907,7 @@
     "name": "pollts",
     "args": "struct pollfd *fds, u_int nfds, const struct timespec *ts, const sigset_t *mask",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -4926,7 +4920,7 @@
     "name": "aio_suspend",
     "args": "const struct aiocb *const *list, int nent, const struct timespec *timeout",
     "pledge": [
-      "stdio"
+      "aio"
     ]
   },
   {
@@ -4938,7 +4932,7 @@
     "name": "stat",
     "args": "const char *path, struct stat *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -4950,7 +4944,7 @@
     "name": "fstat",
     "args": "int fd, struct stat *sb",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -4962,7 +4956,7 @@
     "name": "lstat",
     "args": "const char *path, struct stat *ub",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -5007,7 +5001,7 @@
     "name": "getrusage",
     "args": "int who, struct rusage *rusage",
     "pledge": [
-      "stdio"
+      "process_meta"
     ]
   },
   {
@@ -5019,7 +5013,7 @@
     "name": "timer_settime",
     "args": "timer_t timerid, int flags, const struct itimerspec *value, struct itimerspec *ovalue",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -5031,7 +5025,7 @@
     "name": "timer_gettime",
     "args": "timer_t timerid, struct itimerspec *value",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -5068,7 +5062,7 @@
     "name": "wait4",
     "args": "pid_t pid, int *status, int options, struct rusage *rusage",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -5133,7 +5127,7 @@
     "name": "kqueue1",
     "args": "int flags",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -5254,7 +5248,7 @@
     "name": "fstatat",
     "args": "int fd, const char *path, struct stat *buf, int flag",
     "pledge": [
-      "stdio"
+      "file_metadata_read"
     ]
   },
   {
@@ -5276,7 +5270,6 @@
     "name": "openat",
     "args": "int fd, const char *path, int oflags, ... mode_t mode",
     "pledge": [
-      "inet",
       "rpath",
       "wpath",
       "cpath"
@@ -5342,7 +5335,7 @@
     "name": "posix_spawn",
     "args": "pid_t *pid, const char *path, const struct posix_spawn_file_actions *file_actions, const struct posix_spawnattr *attrp, char *const *argv, char *const *envp",
     "pledge": [
-      "proc"
+      "exec"
     ]
   },
   {
@@ -5377,7 +5370,7 @@
     "name": "clock_nanosleep",
     "args": "clockid_t clock_id, int flags, const struct timespec *rqtp, struct timespec *rmtp",
     "pledge": [
-      "stdio"
+      "timers_and_sleep"
     ]
   },
   {
@@ -5388,7 +5381,7 @@
     "name": "_lwp_park",
     "args": "clockid_t clock_id, int flags, struct timespec *ts, lwpid_t unpark, const void *hint, const void *unparkhint",
     "pledge": [
-      "stdio"
+      "thread_lwp"
     ]
   },
   {
@@ -5420,7 +5413,7 @@
     "name": "wait6",
     "args": "idtype_t idtype, id_t id, int *status, int options, struct wrusage *wru, siginfo_t *info",
     "pledge": [
-      "proc"
+      "process_lifecycle"
     ]
   },
   {
@@ -5431,7 +5424,7 @@
     "name": "clock_getcpuclockid2",
     "args": "idtype_t idtype, id_t id, clockid_t *clock_id",
     "pledge": [
-      "stdio"
+      "time_read"
     ]
   },
   {
@@ -5620,7 +5613,7 @@
     "name": "memfd_create",
     "args": "const char *name, unsigned int flags",
     "pledge": [
-      "stdio"
+      "memory_mgmt"
     ]
   },
   {
@@ -5632,7 +5625,7 @@
     "name": "kevent",
     "args": "int fd, const struct kevent *changelist, size_t nchanges, struct kevent *eventlist, size_t nevents, const struct timespec *timeout",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -5642,7 +5635,7 @@
     "name": "epoll_create1",
     "args": "int flags",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -5652,7 +5645,7 @@
     "name": "epoll_ctl",
     "args": "int epfd, int op, int fd, struct epoll_event *event",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {
@@ -5662,7 +5655,7 @@
     "name": "epoll_pwait2",
     "args": "int epfd, struct epoll_event *events, int maxevents, const struct timespec *timeout, const sigset_t *sigmask",
     "pledge": [
-      "stdio"
+      "multiplex"
     ]
   },
   {

@@ -4,36 +4,84 @@
     "pledge"
   ],
   "stdio": [
-    "read", "write", "close", "getpid", "getpid_with_ppid", "getuid", "getuid_with_euid", 
-    "geteuid", "getgid", "getgid_with_egid", "getegid", "getppid", "sync", "dup", "dup2", 
-    "dup3", "pipe", "pipe2", "getgroups", "setgroups", "getpgrp", "setpgid", "getitimer", 
-    "setitimer", "select", "poll", "pollts", "pselect", "kevent", "kqueue", "kqueue1", 
-    "nanosleep", "clock_gettime", "clock_getres", "clock_settime", "gettimeofday", 
-    "settimeofday", "adjtime", "mincore", "munmap", "msync", "madvise", "fstat", 
-    "fstatat", "stat", "lstat", "issetugid", "umask", "mmap", "mprotect", "mremap", 
-    "lseek", "readv", "pread", "preadv", "getrandom", "fdatasync", "fsync", "fsync_range", 
-    "sysarch", "getpagesize", "getdtablesize", "gethostname", "gethostid", "eventfd", 
-    "minherit", "sched_yield", "uuidgen", "memfd_create", "posix_fadvise", "fpathconf", 
-    "rasctl", "_lwp_create", "_lwp_exit", "_lwp_self", "_lwp_wait", "_lwp_suspend", 
+    "read", "write", "close", "dup", "dup2", "dup3", "pipe", "pipe2", 
+    "readv", "pread", "preadv", "lseek", "fdatasync", "fsync", "fsync_range", 
+    "posix_fadvise", "fcntl"
+  ],
+  "entropy": [
+    "getrandom"
+  ],
+  "identity_get": [
+    "getpid", "getpid_with_ppid", "getuid", "getuid_with_euid", "geteuid", 
+    "getgid", "getgid_with_egid", "getegid", "getppid", "getgroups", 
+    "getpgid", "getpgrp", "issetugid"
+  ],
+  "identity_set": [
+    "setuid", "setreuid", "setregid", "setgid", "setegid", "seteuid", "setgroups"
+  ],
+  "process_lifecycle": [
+    "fork", "vfork", "kill", "killpg", "wait", "wait4", "wait6", 
+    "__clone"
+  ],
+  "process_meta": [
+    "setsid", "getsid", "setpriority", "getpriority", "_sched_setparam", 
+    "_sched_getparam", "_sched_setaffinity", "_sched_getaffinity", "_sched_protect", 
+    "sched_yield", "setrlimit", "getrlimit", "getrusage", "setpgid"
+  ],
+  "thread_lwp": [
+    "_lwp_create", "_lwp_exit", "_lwp_self", "_lwp_wait", "_lwp_suspend", 
     "_lwp_continue", "_lwp_wakeup", "_lwp_getprivate", "_lwp_setprivate", "_lwp_kill", 
     "_lwp_detach", "_lwp_park", "_lwp_unpark", "_lwp_unpark_all", "_lwp_setname", 
-    "_lwp_getname", "_lwp_ctl", "__futex", "__futex_set_robust_list", "__futex_get_robust_list", 
+    "_lwp_getname", "_lwp_ctl", "sysarch"
+  ],
+  "synchronization": [
+    "__futex", "__futex_set_robust_list", "__futex_get_robust_list", 
+    "_ksem_init", "_ksem_open", "_ksem_unlink", "_ksem_close", "_ksem_post", 
+    "_ksem_wait", "_ksem_trywait", "_ksem_getvalue", "_ksem_destroy", "_ksem_timedwait"
+  ],
+  "memory_mgmt": [
+    "mmap", "munmap", "mprotect", "mremap", "madvise", "mincore", "msync", 
+    "memfd_create"
+  ],
+  "time_read": [
+    "clock_gettime", "clock_getres", "gettimeofday", "clock_getcpuclockid2"
+  ],
+  "time_set": [
+    "clock_settime", "settimeofday", "adjtime"
+  ],
+  "timers_and_sleep": [
+    "nanosleep", "clock_nanosleep", "getitimer", "setitimer", 
+    "timerfd_create", "timerfd_settime", "timerfd_gettime", 
+    "timer_create", "timer_delete", "timer_settime", "timer_gettime", "timer_getoverrun"
+  ],
+  "multiplex": [
+    "select", "poll", "pollts", "pselect", "kevent", "kqueue", "kqueue1", 
+    "eventfd", "epoll_create1", "epoll_ctl", "epoll_pwait2"
+  ],
+  "signal": [
     "sigaction", "sigprocmask", "sigpending", "sigaltstack", "sigreturn", "sigvec", 
     "sigblock", "sigsetmask", "sigsuspend", "sigstack", "__sigaction_sigtramp", 
-    "clock_nanosleep", "clock_getcpuclockid2", "getcontext", "setcontext", "sigqueueinfo", 
-    "__sigtimedwait", "aio_cancel", "aio_error", "aio_fsync", "aio_read", "aio_return", 
-    "aio_suspend", "aio_write", "lio_listio", "timerfd_create", "timerfd_settime", 
-    "timerfd_gettime", "getrlimit", "getrusage", "__sysctl", "getpgid", "uname", 
-    "epoll_create1", "epoll_ctl", "epoll_pwait2", "_ksem_init", "_ksem_open", "_ksem_unlink", 
-    "_ksem_close", "_ksem_post", "_ksem_wait", "_ksem_trywait", "_ksem_getvalue", 
-    "_ksem_destroy", "_ksem_timedwait", "timer_create", "timer_delete", "timer_settime", 
-    "timer_gettime", "timer_getoverrun"
+    "__sigtimedwait", "getcontext", "setcontext"
+  ],
+  "aio": [
+    "aio_cancel", "aio_error", "aio_fsync", "aio_read", "aio_return", 
+    "aio_suspend", "aio_write", "lio_listio"
+  ],
+  "sys_info": [
+    "__sysctl", "uname", "gethostname", "gethostid", "getdtablesize", 
+    "uuidgen", "fpathconf", "getpagesize"
+  ],
+  "file_metadata_read": [
+    "fstat", "fstatat", "stat", "lstat"
+  ],
+  "fs_sync": [
+    "sync"
   ],
   "tty": [
     "ioctl"
   ],
   "inet": [
-    "ioctl", "open", "openat", "socket", "bind", "connect", "listen", "accept", 
+    "ioctl", "socket", "bind", "connect", "listen", "accept", 
     "paccept", "sendto", "sendmsg", "sendmmsg", "recvfrom", "recvmsg", "recvmmsg", 
     "getsockopt", "setsockopt", "getpeername", "getsockname", "shutdown", "getsockopt2", 
     "send", "recv"
@@ -56,14 +104,11 @@
     "fsetxattr", "removexattr", "lremovexattr", "fremovexattr", "extattr_set_file", 
     "extattr_set_fd", "extattr_set_link", "extattr_delete_file", "extattr_delete_fd", 
     "extattr_delete_link", "__acl_set_link", "__acl_set_file", "__acl_set_fd", 
-    "__acl_delete_link", "__acl_delete_file", "__acl_delete_fd", "creat"
+    "__acl_delete_link", "__acl_delete_file", "__acl_delete_fd", "creat", "umask"
   ],
   "chown": [
     "chown", "fchown", "fchownat", "lchown", "__posix_chown", "__posix_fchown", 
     "__posix_lchown"
-  ],
-  "id": [
-    "setuid", "setreuid", "setregid", "setgid", "setegid", "seteuid"
   ],
   "rpath": [
     "open", "openat", "readlink", "readlinkat", "access", "faccessat", "chdir", 
@@ -84,16 +129,11 @@
     "unlinkat", "link", "linkat", "symlink", "symlinkat", "mkfifo", "mkfifoat", 
     "mknod", "mknodat", "creat", "undelete", "__posix_rename"
   ],
-  "proc": [
-    "fork", "vfork", "kill", "killpg", "wait", "wait4", "wait6", "posix_spawn", 
-    "__clone", "setrlimit", "setsid", "getsid", "setpriority", "getpriority", 
-    "_sched_setparam", "_sched_getparam", "_sched_setaffinity", "_sched_getaffinity", 
-    "_sched_protect"
-  ],
   "exec": [
     "execve",
     "fexecve",
-    "execv"
+    "execv",
+    "posix_spawn"
   ],
   "sysv_ipc": [
     "semtimedop", "semget", "semop", "semconfig", "msgctl", "msgget", "msgsnd", 

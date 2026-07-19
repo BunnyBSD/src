@@ -310,6 +310,8 @@ def action_export():
 #include "opt_pledge.h"
 #endif
 
+#define PLEDGE_MAX_PROMISES_LEN 1024
+
 #define PLEDGE_ALWAYS        (0xffffffffffffffffULL)
 #define PLEDGE_ERROR         (1ULL << 0)
 {dynamic_defines_str}
