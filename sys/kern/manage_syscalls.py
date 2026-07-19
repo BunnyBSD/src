@@ -258,13 +258,15 @@ def action_export():
     print(f"Exporting database to build files...")
 
     # Load raw pledge map to find promises for pledge.h generation
+    if not os.path.exists(MAP_FILE):
+        print(f"Error: '{MAP_FILE}' not found.", file=sys.stderr)
+        sys.exit(1)
     with open(MAP_FILE, "r", encoding="utf-8") as f:
         try:
             raw_map = json.load(f)
         except Exception as e:
             print(f"Error reading '{MAP_FILE}': {e}", file=sys.stderr)
             sys.exit(1)
-
     # Exclude system reserved keywords (bypass, forbidden, error) from dynamic bit generation
     promises = [k for k in raw_map.keys() if k not in ["bypass", "forbidden", "error"]]
     promises.sort()  # Keep defines sorted deterministically
