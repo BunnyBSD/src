@@ -31,9 +31,23 @@
 #include "opt_pledge.h"
 #endif
 
-#define PLEDGE_ERROR (1ULL << 0)
-#define PLEDGE_STDIO (1ULL << 1)
-#define PLEDGE_RPATH (1ULL << 2)
+#define PLEDGE_ALWAYS        (0xffffffffffffffffULL)
+#define PLEDGE_ERROR         (1ULL << 0)
+#define PLEDGE_AUDIO         (1ULL << 1)
+#define PLEDGE_CHOWN         (1ULL << 2)
+#define PLEDGE_CPATH         (1ULL << 3)
+#define PLEDGE_EXEC          (1ULL << 4)
+#define PLEDGE_FATTR         (1ULL << 5)
+#define PLEDGE_FLOCK         (1ULL << 6)
+#define PLEDGE_ID            (1ULL << 7)
+#define PLEDGE_INET          (1ULL << 8)
+#define PLEDGE_PROC          (1ULL << 9)
+#define PLEDGE_RPATH         (1ULL << 10)
+#define PLEDGE_STDIO         (1ULL << 11)
+#define PLEDGE_SYSV_IPC      (1ULL << 12)
+#define PLEDGE_TTY           (1ULL << 13)
+#define PLEDGE_UNIX          (1ULL << 14)
+#define PLEDGE_WPATH         (1ULL << 15)
 
 
 #ifdef _KERNEL
@@ -41,6 +55,13 @@
 
 struct lwp;
 bool pledge_check(struct lwp *, int);
+
+struct pledge_promise {
+    const char *name;
+    uint64_t mask;
+};
+
+extern const struct pledge_promise pledge_promises[];
 
 #endif /* PLEDGE */
 #else /* _KERNEL */
