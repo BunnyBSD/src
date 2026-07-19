@@ -120,6 +120,7 @@ defflag opt_syscall_stats.h	SYSCALL_TIMES_HASCOUNTER: SYSCALL_TIMES
 defflag opt_pledge.h PLEDGE
 file kern/subr_syscall_stats.c	syscall_stats
 file kern/kern_pledge.c
+file kern/sys_pledge.c
 
 defparam opt_pax.h		PAX_MPROTECT
 				PAX_MPROTECT_DEBUG
