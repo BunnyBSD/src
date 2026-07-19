@@ -1,0 +1,5701 @@
+[
+  {
+    "type": "raw",
+    "text": "$NetBSD: syscalls.master,v 1.316 2024/10/09 16:27:28 christos Exp $"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": ";\t@(#)syscalls.master\t8.2 (Berkeley) 1/13/94"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; NetBSD system call name/number \"master\" file."
+  },
+  {
+    "type": "raw",
+    "text": "; (See syscalls.conf to see what it is processed into.)"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; Fields: number type [type-dependent ...]"
+  },
+  {
+    "type": "raw",
+    "text": ";\tnumber\tsystem call number, must be in order"
+  },
+  {
+    "type": "raw",
+    "text": ";\ttype\tone of STD, OBSOL, UNIMPL, IGNORED, NODEF, NOARGS, or one of"
+  },
+  {
+    "type": "raw",
+    "text": ";\t\tthe compatibility options defined in syscalls.conf."
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; Optional fields are specified after the type field"
+  },
+  {
+    "type": "raw",
+    "text": "; (NOTE! they *must* be specified in this order):"
+  },
+  {
+    "type": "raw",
+    "text": ";\tMODULAR modname :attempt to autoload system call module if not present"
+  },
+  {
+    "type": "raw",
+    "text": ";\tRUMP:\tgenerate rump syscall entry point"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; types:"
+  },
+  {
+    "type": "raw",
+    "text": ";\tSTD\talways included"
+  },
+  {
+    "type": "raw",
+    "text": ";\tOBSOL\tobsolete, not included in system"
+  },
+  {
+    "type": "raw",
+    "text": ";\tIGNORED\tsyscall is a null op, but always succeeds"
+  },
+  {
+    "type": "raw",
+    "text": ";\tUNIMPL\tunimplemented, not included in system"
+  },
+  {
+    "type": "raw",
+    "text": ";\tEXCL\timplemented, but not included in system"
+  },
+  {
+    "type": "raw",
+    "text": ";\tNODEF\tincluded, but don't define the syscall number"
+  },
+  {
+    "type": "raw",
+    "text": ";\tNOARGS\tincluded, but don't define the syscall args structure"
+  },
+  {
+    "type": "raw",
+    "text": ";\tINDIR\tincluded, but don't define the syscall args structure,"
+  },
+  {
+    "type": "raw",
+    "text": ";\t\tand allow it to be \"really\" varargs."
+  },
+  {
+    "type": "raw",
+    "text": ";\tNOERR\tincluded, syscall does not set errno"
+  },
+  {
+    "type": "raw",
+    "text": ";\tEXTERN\timplemented, but as 3rd party module"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; arguments:"
+  },
+  {
+    "type": "raw",
+    "text": ";\tPAD\targument not part of the C interface, used only for padding"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; The compat options are defined in the syscalls.conf file, and the"
+  },
+  {
+    "type": "raw",
+    "text": "; compat option name is prefixed to the syscall name.  Other than"
+  },
+  {
+    "type": "raw",
+    "text": "; that, they're like NODEF (for 'compat' options), or STD (for"
+  },
+  {
+    "type": "raw",
+    "text": "; 'libcompat' options)."
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; The type-dependent arguments are as follows:"
+  },
+  {
+    "type": "raw",
+    "text": "; For STD, NODEF, NOARGS, and compat syscalls:"
+  },
+  {
+    "type": "raw",
+    "text": ";\t{ return_type|prefix|compat(optional)|basename(pseudo-proto); } [alias]"
+  },
+  {
+    "type": "raw",
+    "text": "; For other syscalls:"
+  },
+  {
+    "type": "raw",
+    "text": ";\t[comment]"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; #ifdef's, etc. may be included, and are copied to the output files."
+  },
+  {
+    "type": "raw",
+    "text": "; #include's are copied to the syscall names and switch definition files only."
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "#ifdef _KERNEL_OPT"
+  },
+  {
+    "type": "raw",
+    "text": "#include \"opt_modular.h\""
+  },
+  {
+    "type": "raw",
+    "text": "#include \"opt_ntp.h\""
+  },
+  {
+    "type": "raw",
+    "text": "#include \"opt_sysv.h\""
+  },
+  {
+    "type": "raw",
+    "text": "#endif"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/param.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/systm.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/signal.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/socket.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/mount.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/sched.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/idtype.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/syscallargs.h>"
+  },
+  {
+    "type": "raw",
+    "text": "#include <sys/acl.h>"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "%%"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; Reserved/unimplemented system calls in the range 0-150 inclusive"
+  },
+  {
+    "type": "raw",
+    "text": "; are reserved for use in future Berkeley releases."
+  },
+  {
+    "type": "raw",
+    "text": "; Additional system calls implemented in vendor and other"
+  },
+  {
+    "type": "raw",
+    "text": "; redistributions should be placed in the reserved range at the end"
+  },
+  {
+    "type": "raw",
+    "text": "; of the current calls."
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "num": 0,
+    "type": "INDIR",
+    "return": "int",
+    "name": "syscall",
+    "args": "int code, ... register_t args[SYS_MAXSYSARGS]",
+    "pledge": []
+  },
+  {
+    "num": 1,
+    "type": "STD",
+    "return": "void",
+    "name": "exit",
+    "args": "int rval",
+    "pledge": [
+      "always"
+    ]
+  },
+  {
+    "num": 2,
+    "type": "STD",
+    "return": "int",
+    "name": "fork",
+    "args": "void",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 3,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "read",
+    "args": "int fd, void *buf, size_t nbyte",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 4,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "write",
+    "args": "int fd, const void *buf, size_t nbyte",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 5,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "open",
+    "args": "const char *path, int flags, ... mode_t mode",
+    "pledge": [
+      "inet",
+      "rpath",
+      "wpath",
+      "cpath"
+    ]
+  },
+  {
+    "num": 6,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "close",
+    "args": "int fd",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 7,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "wait4",
+    "args": "pid_t pid, int *status, int options, struct rusage50 *rusage",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 8,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ocreat",
+    "return": "int",
+    "name": "creat",
+    "args": "const char *path, mode_t mode",
+    "pledge": [
+      "fattr",
+      "wpath",
+      "cpath"
+    ]
+  },
+  {
+    "num": 9,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "link",
+    "args": "const char *path, const char *link",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 10,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "unlink",
+    "args": "const char *path",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 11,
+    "type": "OBSOL",
+    "comment": "execv"
+  },
+  {
+    "num": 12,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "chdir",
+    "args": "const char *path",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 13,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchdir",
+    "args": "int fd",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 14,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "mknod",
+    "args": "const char *path, mode_t mode, uint32_t dev",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 15,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "chmod",
+    "args": "const char *path, mode_t mode",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 16,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "chown",
+    "args": "const char *path, uid_t uid, gid_t gid",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 17,
+    "type": "STD",
+    "alias": "break",
+    "return": "int",
+    "name": "obreak",
+    "args": "char *nsize",
+    "pledge": []
+  },
+  {
+    "num": 18,
+    "type": "COMPAT_20",
+    "modular": "compat_20",
+    "return": "int",
+    "name": "getfsstat",
+    "args": "struct statfs12 *buf, long bufsize, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 19,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "olseek",
+    "return": "long",
+    "name": "lseek",
+    "args": "int fd, long offset, int whence",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 20,
+    "type": "NOERR",
+    "rump": true,
+    "alias": "getpid",
+    "return": "pid_t",
+    "name": "getpid_with_ppid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 21,
+    "type": "COMPAT_40",
+    "modular": "compat_40",
+    "return": "int",
+    "name": "mount",
+    "args": "const char *type, const char *path, int flags, void *data",
+    "pledge": []
+  },
+  {
+    "num": 22,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "unmount",
+    "args": "const char *path, int flags",
+    "pledge": []
+  },
+  {
+    "num": 23,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setuid",
+    "args": "uid_t uid",
+    "pledge": [
+      "id"
+    ]
+  },
+  {
+    "num": 24,
+    "type": "NOERR",
+    "rump": true,
+    "alias": "getuid",
+    "return": "uid_t",
+    "name": "getuid_with_euid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 25,
+    "type": "NOERR",
+    "rump": true,
+    "return": "uid_t",
+    "name": "geteuid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 26,
+    "type": "STD",
+    "modular": "ptrace",
+    "return": "int",
+    "name": "ptrace",
+    "args": "int req, pid_t pid, void *addr, int data",
+    "pledge": []
+  },
+  {
+    "num": 27,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "recvmsg",
+    "args": "int s, struct msghdr *msg, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 28,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "sendmsg",
+    "args": "int s, const struct msghdr *msg, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 29,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "recvfrom",
+    "args": "int s, void *buf, size_t len, int flags, struct sockaddr *from, socklen_t *fromlenaddr",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 30,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "accept",
+    "args": "int s, struct sockaddr *name, socklen_t *anamelen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 31,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getpeername",
+    "args": "int fdes, struct sockaddr *asa, socklen_t *alen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 32,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getsockname",
+    "args": "int fdes, struct sockaddr *asa, socklen_t *alen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 33,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "access",
+    "args": "const char *path, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 34,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "chflags",
+    "args": "const char *path, u_long flags",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 35,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchflags",
+    "args": "int fd, u_long flags",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 36,
+    "type": "NOERR",
+    "rump": true,
+    "return": "void",
+    "name": "sync",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 37,
+    "type": "STD",
+    "return": "int",
+    "name": "kill",
+    "args": "pid_t pid, int signum",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 38,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "stat43",
+    "return": "int",
+    "name": "stat",
+    "args": "const char *path, struct stat43 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 39,
+    "type": "NOERR",
+    "rump": true,
+    "return": "pid_t",
+    "name": "getppid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 40,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "lstat43",
+    "return": "int",
+    "name": "lstat",
+    "args": "const char *path, struct stat43 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 41,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "dup",
+    "args": "int fd",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 42,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "pipe",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 43,
+    "type": "NOERR",
+    "rump": true,
+    "return": "gid_t",
+    "name": "getegid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 44,
+    "type": "STD",
+    "return": "int",
+    "name": "profil",
+    "args": "char *samples, size_t size, u_long offset, u_int scale",
+    "pledge": []
+  },
+  {
+    "num": 45,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "ktrace",
+    "args": "const char *fname, int ops, int facs, pid_t pid",
+    "pledge": []
+  },
+  {
+    "num": 46,
+    "type": "COMPAT_13",
+    "modular": "compat_13",
+    "alias": "sigaction13",
+    "return": "int",
+    "name": "sigaction",
+    "args": "int signum, const struct sigaction13 *nsa, struct sigaction13 *osa",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 47,
+    "type": "NOERR",
+    "rump": true,
+    "alias": "getgid",
+    "return": "gid_t",
+    "name": "getgid_with_egid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 48,
+    "type": "COMPAT_13",
+    "modular": "compat_13",
+    "alias": "sigprocmask13",
+    "return": "int",
+    "name": "sigprocmask",
+    "args": "int how, int mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 49,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__getlogin",
+    "args": "char *namebuf, size_t namelen",
+    "pledge": []
+  },
+  {
+    "num": 50,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__setlogin",
+    "args": "const char *namebuf",
+    "pledge": []
+  },
+  {
+    "num": 51,
+    "type": "STD",
+    "return": "int",
+    "name": "acct",
+    "args": "const char *path",
+    "pledge": []
+  },
+  {
+    "num": 52,
+    "type": "COMPAT_13",
+    "modular": "compat_13",
+    "alias": "sigpending13",
+    "return": "int",
+    "name": "sigpending",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 53,
+    "type": "COMPAT_13",
+    "modular": "compat_13",
+    "alias": "sigaltstack13",
+    "return": "int",
+    "name": "sigaltstack",
+    "args": "const struct sigaltstack13 *nss, struct sigaltstack13 *oss",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 54,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "ioctl",
+    "args": "int fd, u_long com, ... void *data",
+    "pledge": [
+      "tty",
+      "inet",
+      "audio"
+    ]
+  },
+  {
+    "num": 55,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "alias": "oreboot",
+    "return": "int",
+    "name": "reboot",
+    "args": "int opt",
+    "pledge": []
+  },
+  {
+    "num": 56,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "revoke",
+    "args": "const char *path",
+    "pledge": []
+  },
+  {
+    "num": 57,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "symlink",
+    "args": "const char *path, const char *link",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 58,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "readlink",
+    "args": "const char *path, char *buf, size_t count",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 59,
+    "type": "STD",
+    "return": "int",
+    "name": "execve",
+    "args": "const char *path, char * const *argp, char * const *envp",
+    "pledge": [
+      "exec"
+    ]
+  },
+  {
+    "num": 60,
+    "type": "STD",
+    "rump": true,
+    "return": "mode_t",
+    "name": "umask",
+    "args": "mode_t newmask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 61,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "chroot",
+    "args": "const char *path",
+    "pledge": []
+  },
+  {
+    "num": 62,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "fstat43",
+    "return": "int",
+    "name": "fstat",
+    "args": "int fd, struct stat43 *sb",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 63,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetkerninfo",
+    "return": "int",
+    "name": "getkerninfo",
+    "args": "int op, char *where, int *size, int arg",
+    "pledge": []
+  },
+  {
+    "num": 64,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetpagesize",
+    "return": "int",
+    "name": "getpagesize",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 65,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "return": "int",
+    "name": "msync",
+    "args": "void *addr, size_t len",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": "; XXX COMPAT_??? for 4.4BSD-compatible vfork(2)?"
+  },
+  {
+    "num": 66,
+    "type": "STD",
+    "return": "int",
+    "name": "vfork",
+    "args": "void",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 67,
+    "type": "OBSOL",
+    "comment": "vread"
+  },
+  {
+    "num": 68,
+    "type": "OBSOL",
+    "comment": "vwrite"
+  },
+  {
+    "num": 69,
+    "type": "OBSOL",
+    "comment": "sbrk"
+  },
+  {
+    "num": 70,
+    "type": "OBSOL",
+    "comment": "sstk"
+  },
+  {
+    "num": 71,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ommap",
+    "return": "int",
+    "name": "mmap",
+    "args": "void *addr, size_t len, int prot, int flags, int fd, long pos",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 72,
+    "type": "STD",
+    "alias": "vadvise",
+    "return": "int",
+    "name": "ovadvise",
+    "args": "int anom",
+    "pledge": []
+  },
+  {
+    "num": 73,
+    "type": "STD",
+    "return": "int",
+    "name": "munmap",
+    "args": "void *addr, size_t len",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 74,
+    "type": "STD",
+    "return": "int",
+    "name": "mprotect",
+    "args": "void *addr, size_t len, int prot",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 75,
+    "type": "STD",
+    "return": "int",
+    "name": "madvise",
+    "args": "void *addr, size_t len, int behav",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 76,
+    "type": "OBSOL",
+    "comment": "vhangup"
+  },
+  {
+    "num": 77,
+    "type": "OBSOL",
+    "comment": "vlimit"
+  },
+  {
+    "num": 78,
+    "type": "STD",
+    "return": "int",
+    "name": "mincore",
+    "args": "void *addr, size_t len, char *vec",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 79,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getgroups",
+    "args": "int gidsetsize, gid_t *gidset",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 80,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setgroups",
+    "args": "int gidsetsize, const gid_t *gidset",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 81,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getpgrp",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 82,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setpgid",
+    "args": "pid_t pid, pid_t pgid",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 83,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "setitimer",
+    "args": "int which, const struct itimerval50 *itv, struct itimerval50 *oitv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 84,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "owait",
+    "return": "int",
+    "name": "wait",
+    "args": "void",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 85,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "alias": "oswapon",
+    "return": "int",
+    "name": "swapon",
+    "args": "const char *name",
+    "pledge": []
+  },
+  {
+    "num": 86,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "getitimer",
+    "args": "int which, struct itimerval50 *itv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 87,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogethostname",
+    "return": "int",
+    "name": "gethostname",
+    "args": "char *hostname, u_int len",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 88,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osethostname",
+    "return": "int",
+    "name": "sethostname",
+    "args": "char *hostname, u_int len",
+    "pledge": []
+  },
+  {
+    "num": 89,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetdtablesize",
+    "return": "int",
+    "name": "getdtablesize",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 90,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "dup2",
+    "args": "int from, int to",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 91,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "getrandom",
+    "args": "void *buf, size_t buflen, unsigned int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 92,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fcntl",
+    "args": "int fd, int cmd, ... void *arg",
+    "pledge": [
+      "flock"
+    ]
+  },
+  {
+    "num": 93,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "select",
+    "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, struct timeval50 *tv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 94,
+    "type": "UNIMPL",
+    "comment": "setdopt"
+  },
+  {
+    "num": 95,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fsync",
+    "args": "int fd",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 96,
+    "type": "STD",
+    "return": "int",
+    "name": "setpriority",
+    "args": "int which, id_t who, int prio",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 97,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "socket",
+    "args": "int domain, int type, int protocol",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 98,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "connect",
+    "args": "int s, const struct sockaddr *name, socklen_t namelen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 99,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "oaccept",
+    "return": "int",
+    "name": "accept",
+    "args": "int s, void *name, socklen_t *anamelen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 100,
+    "type": "STD",
+    "return": "int",
+    "name": "getpriority",
+    "args": "int which, id_t who",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 101,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osend",
+    "return": "int",
+    "name": "send",
+    "args": "int s, void *buf, int len, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 102,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "orecv",
+    "return": "int",
+    "name": "recv",
+    "args": "int s, void *buf, int len, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 103,
+    "type": "COMPAT_13",
+    "modular": "compat_13",
+    "alias": "sigreturn13",
+    "return": "int",
+    "name": "sigreturn",
+    "args": "struct sigcontext13 *sigcntxp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 104,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "bind",
+    "args": "int s, const struct sockaddr *name, socklen_t namelen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 105,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setsockopt",
+    "args": "int s, int level, int name, const void *val, socklen_t valsize",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 106,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "listen",
+    "args": "int s, int backlog",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 107,
+    "type": "OBSOL",
+    "comment": "vtimes"
+  },
+  {
+    "num": 108,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osigvec",
+    "return": "int",
+    "name": "sigvec",
+    "args": "int signum, struct sigvec *nsv, struct sigvec *osv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 109,
+    "type": "COMPAT_43",
+    "modular": "compat",
+    "alias": "osigblock",
+    "return": "int",
+    "name": "sigblock",
+    "args": "int mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 110,
+    "type": "COMPAT_43",
+    "modular": "compat",
+    "alias": "osigsetmask",
+    "return": "int",
+    "name": "sigsetmask",
+    "args": "int mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 111,
+    "type": "COMPAT_13",
+    "modular": "compat",
+    "alias": "sigsuspend13",
+    "return": "int",
+    "name": "sigsuspend",
+    "args": "int mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 112,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osigstack",
+    "return": "int",
+    "name": "sigstack",
+    "args": "struct sigstack *nss, struct sigstack *oss",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 113,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "orecvmsg",
+    "return": "int",
+    "name": "recvmsg",
+    "args": "int s, struct omsghdr *msg, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 114,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osendmsg",
+    "return": "int",
+    "name": "sendmsg",
+    "args": "int s, void *msg, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 115,
+    "type": "OBSOL",
+    "comment": "vtrace"
+  },
+  {
+    "num": 116,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "gettimeofday",
+    "args": "struct timeval50 *tp, void *tzp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 117,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "getrusage",
+    "args": "int who, struct rusage50 *rusage",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 118,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getsockopt",
+    "args": "int s, int level, int name, void *val, socklen_t *avalsize",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 119,
+    "type": "OBSOL",
+    "comment": "resuba"
+  },
+  {
+    "num": 120,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "readv",
+    "args": "int fd, const struct iovec *iovp, int iovcnt",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 121,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "writev",
+    "args": "int fd, const struct iovec *iovp, int iovcnt",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 122,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "settimeofday",
+    "args": "const struct timeval50 *tv, const void *tzp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 123,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchown",
+    "args": "int fd, uid_t uid, gid_t gid",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 124,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchmod",
+    "args": "int fd, mode_t mode",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 125,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "orecvfrom",
+    "return": "int",
+    "name": "recvfrom",
+    "args": "int s, void *buf, size_t len, int flags, void *from, socklen_t *fromlenaddr",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 126,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setreuid",
+    "args": "uid_t ruid, uid_t euid",
+    "pledge": [
+      "id"
+    ]
+  },
+  {
+    "num": 127,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setregid",
+    "args": "gid_t rgid, gid_t egid",
+    "pledge": [
+      "id"
+    ]
+  },
+  {
+    "num": 128,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "rename",
+    "args": "const char *from, const char *to",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 129,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "otruncate",
+    "return": "int",
+    "name": "truncate",
+    "args": "const char *path, long length",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 130,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "oftruncate",
+    "return": "int",
+    "name": "ftruncate",
+    "args": "int fd, long length",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 131,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "flock",
+    "args": "int fd, int how",
+    "pledge": [
+      "flock"
+    ]
+  },
+  {
+    "num": 132,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "mkfifo",
+    "args": "const char *path, mode_t mode",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 133,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "sendto",
+    "args": "int s, const void *buf, size_t len, int flags, const struct sockaddr *to, socklen_t tolen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 134,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "shutdown",
+    "args": "int s, int how",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 135,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "socketpair",
+    "args": "int domain, int type, int protocol, int *rsv",
+    "pledge": [
+      "unix"
+    ]
+  },
+  {
+    "num": 136,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "mkdir",
+    "args": "const char *path, mode_t mode",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 137,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "rmdir",
+    "args": "const char *path",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 138,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "utimes",
+    "args": "const char *path, const struct timeval50 *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 139,
+    "type": "OBSOL",
+    "comment": "4.2 sigreturn"
+  },
+  {
+    "num": 140,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "adjtime",
+    "args": "const struct timeval50 *delta, struct timeval50 *olddelta",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 141,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetpeername",
+    "return": "int",
+    "name": "getpeername",
+    "args": "int fdes, void *asa, socklen_t *alen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 142,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogethostid",
+    "return": "int32_t",
+    "name": "gethostid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 143,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osethostid",
+    "return": "int",
+    "name": "sethostid",
+    "args": "int32_t hostid",
+    "pledge": []
+  },
+  {
+    "num": 144,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetrlimit",
+    "return": "int",
+    "name": "getrlimit",
+    "args": "int which, struct orlimit *rlp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 145,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "osetrlimit",
+    "return": "int",
+    "name": "setrlimit",
+    "args": "int which, const struct orlimit *rlp",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 146,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "okillpg",
+    "return": "int",
+    "name": "killpg",
+    "args": "int pgid, int signum",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 147,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setsid",
+    "args": "void",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 148,
+    "type": "COMPAT_50",
+    "modular": "compat_50_quota",
+    "return": "int",
+    "name": "quotactl",
+    "args": "const char *path, int cmd, int uid, void *arg",
+    "pledge": []
+  },
+  {
+    "num": 149,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "oquota",
+    "return": "int",
+    "name": "quota",
+    "args": "void",
+    "pledge": []
+  },
+  {
+    "num": 150,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetsockname",
+    "return": "int",
+    "name": "getsockname",
+    "args": "int fdec, void *asa, socklen_t *alen",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; Syscalls 151-180 inclusive are reserved for vendor-specific"
+  },
+  {
+    "type": "raw",
+    "text": "; system calls.  (This includes various calls added for compatibity"
+  },
+  {
+    "type": "raw",
+    "text": "; with other Unix variants.)"
+  },
+  {
+    "type": "raw",
+    "text": "; Some of these calls are now supported by BSD..."
+  },
+  {
+    "num": 151,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 152,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 153,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 154,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 155,
+    "type": "STD",
+    "modular": "nfsserver",
+    "rump": true,
+    "return": "int",
+    "name": "nfssvc",
+    "args": "int flag, void *argp",
+    "pledge": []
+  },
+  {
+    "num": 156,
+    "type": "COMPAT_43",
+    "modular": "compat_43",
+    "alias": "ogetdirentries",
+    "return": "int",
+    "name": "getdirentries",
+    "args": "int fd, char *buf, u_int count, long *basep",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 157,
+    "type": "COMPAT_20",
+    "modular": "compat_20",
+    "return": "int",
+    "name": "statfs",
+    "args": "const char *path, struct statfs12 *buf",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 158,
+    "type": "COMPAT_20",
+    "modular": "compat_20",
+    "return": "int",
+    "name": "fstatfs",
+    "args": "int fd, struct statfs12 *buf",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 159,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 160,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 161,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "getfh",
+    "args": "const char *fname, struct compat_30_fhandle *fhp",
+    "pledge": []
+  },
+  {
+    "num": 162,
+    "type": "COMPAT_09",
+    "modular": "compat_09",
+    "alias": "ogetdomainname",
+    "return": "int",
+    "name": "getdomainname",
+    "args": "char *domainname, int len",
+    "pledge": []
+  },
+  {
+    "num": 163,
+    "type": "COMPAT_09",
+    "modular": "compat_09",
+    "alias": "osetdomainname",
+    "return": "int",
+    "name": "setdomainname",
+    "args": "char *domainname, int len",
+    "pledge": []
+  },
+  {
+    "num": 164,
+    "type": "COMPAT_09",
+    "modular": "compat",
+    "alias": "ouname",
+    "return": "int",
+    "name": "uname",
+    "args": "struct outsname *name",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 165,
+    "type": "STD",
+    "return": "int",
+    "name": "sysarch",
+    "args": "int op, void *parms",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 166,
+    "type": "STD",
+    "return": "int",
+    "name": "__futex",
+    "args": "int *uaddr, int op, int val, const struct timespec *timeout, int *uaddr2, int val2, int val3",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 167,
+    "type": "STD",
+    "return": "int",
+    "name": "__futex_set_robust_list",
+    "args": "void *head, size_t len",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 168,
+    "type": "STD",
+    "return": "int",
+    "name": "__futex_get_robust_list",
+    "args": "lwpid_t lwpid, void **headp, size_t *lenp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": "; XXX more generally, never on machines where sizeof(void *) != sizeof(int)"
+  },
+  {
+    "type": "raw",
+    "text": "#if !defined(_LP64)"
+  },
+  {
+    "num": 169,
+    "type": "COMPAT_10",
+    "modular": "compat_sysv_10",
+    "alias": "osemsys",
+    "return": "int",
+    "name": "semsys",
+    "args": "int which, int a2, int a3, int a4, int a5",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "#else"
+  },
+  {
+    "num": 169,
+    "type": "EXCL",
+    "comment": "1.0 semsys"
+  },
+  {
+    "type": "raw",
+    "text": "#endif"
+  },
+  {
+    "type": "raw",
+    "text": "; XXX more generally, never on machines where sizeof(void *) != sizeof(int)"
+  },
+  {
+    "type": "raw",
+    "text": "#if !defined(_LP64)"
+  },
+  {
+    "num": 170,
+    "type": "COMPAT_10",
+    "modular": "compat_sysv_10",
+    "alias": "omsgsys",
+    "return": "int",
+    "name": "msgsys",
+    "args": "int which, int a2, int a3, int a4, int a5, int a6",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "#else"
+  },
+  {
+    "num": 170,
+    "type": "EXCL",
+    "comment": "1.0 msgsys"
+  },
+  {
+    "type": "raw",
+    "text": "#endif"
+  },
+  {
+    "type": "raw",
+    "text": "; XXX more generally, never on machines where sizeof(void *) != sizeof(int)"
+  },
+  {
+    "type": "raw",
+    "text": "#if !defined(_LP64)"
+  },
+  {
+    "num": 171,
+    "type": "COMPAT_10",
+    "modular": "compat_sysv_10",
+    "alias": "oshmsys",
+    "return": "int",
+    "name": "shmsys",
+    "args": "int which, int a2, int a3, int a4",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "#else"
+  },
+  {
+    "num": 171,
+    "type": "EXCL",
+    "comment": "1.0 shmsys"
+  },
+  {
+    "type": "raw",
+    "text": "#endif"
+  },
+  {
+    "num": 172,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 173,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "pread",
+    "args": "int fd, void *buf, size_t nbyte, int PAD, off_t offset",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 174,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "pwrite",
+    "args": "int fd, const void *buf, size_t nbyte, int PAD, off_t offset",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": "; For some reason, ntp_gettime doesn't want to raise SIGSYS when it's excluded."
+  },
+  {
+    "num": 175,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "ntp_gettime",
+    "args": "struct ntptimeval30 *ntvp",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "#if defined(NTP) || !defined(_KERNEL_OPT)"
+  },
+  {
+    "num": 176,
+    "type": "STD",
+    "return": "int",
+    "name": "ntp_adjtime",
+    "args": "struct timex *tp",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "#else"
+  },
+  {
+    "num": 176,
+    "type": "EXCL",
+    "comment": "ntp_adjtime"
+  },
+  {
+    "type": "raw",
+    "text": "#endif"
+  },
+  {
+    "num": 177,
+    "type": "STD",
+    "return": "int",
+    "name": "timerfd_create",
+    "args": "clockid_t clock_id, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 178,
+    "type": "STD",
+    "return": "int",
+    "name": "timerfd_settime",
+    "args": "int fd, int flags, const struct itimerspec *new_value, struct itimerspec *old_value",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 179,
+    "type": "STD",
+    "return": "int",
+    "name": "timerfd_gettime",
+    "args": "int fd, struct itimerspec *curr_value",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 180,
+    "type": "UNIMPL"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; Syscalls 180-199 are used by/reserved for BSD"
+  },
+  {
+    "num": 181,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setgid",
+    "args": "gid_t gid",
+    "pledge": [
+      "id"
+    ]
+  },
+  {
+    "num": 182,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setegid",
+    "args": "gid_t egid",
+    "pledge": [
+      "id"
+    ]
+  },
+  {
+    "num": 183,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "seteuid",
+    "args": "uid_t euid",
+    "pledge": [
+      "id"
+    ]
+  },
+  {
+    "num": 184,
+    "type": "STD",
+    "modular": "lfs",
+    "return": "int",
+    "name": "lfs_bmapv",
+    "args": "fsid_t *fsidp, struct block_info *blkiov, int blkcnt",
+    "pledge": []
+  },
+  {
+    "num": 185,
+    "type": "STD",
+    "modular": "lfs",
+    "return": "int",
+    "name": "lfs_markv",
+    "args": "fsid_t *fsidp, struct block_info *blkiov, int blkcnt",
+    "pledge": []
+  },
+  {
+    "num": 186,
+    "type": "STD",
+    "modular": "lfs",
+    "return": "int",
+    "name": "lfs_segclean",
+    "args": "fsid_t *fsidp, u_long segment",
+    "pledge": []
+  },
+  {
+    "num": 187,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "lfs_segwait",
+    "args": "fsid_t *fsidp, struct timeval50 *tv",
+    "pledge": []
+  },
+  {
+    "num": 188,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "alias": "stat12",
+    "return": "int",
+    "name": "stat",
+    "args": "const char *path, struct stat12 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 189,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "alias": "fstat12",
+    "return": "int",
+    "name": "fstat",
+    "args": "int fd, struct stat12 *sb",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 190,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "alias": "lstat12",
+    "return": "int",
+    "name": "lstat",
+    "args": "const char *path, struct stat12 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 191,
+    "type": "STD",
+    "rump": true,
+    "return": "long",
+    "name": "pathconf",
+    "args": "const char *path, int name",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 192,
+    "type": "STD",
+    "rump": true,
+    "return": "long",
+    "name": "fpathconf",
+    "args": "int fd, int name",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 193,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getsockopt2",
+    "args": "int s, int level, int name, void *val, socklen_t *avalsize",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 194,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getrlimit",
+    "args": "int which, struct rlimit *rlp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 195,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setrlimit",
+    "args": "int which, const struct rlimit *rlp",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 196,
+    "type": "COMPAT_12",
+    "modular": "compat_12",
+    "return": "int",
+    "name": "getdirentries",
+    "args": "int fd, char *buf, u_int count, long *basep",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 197,
+    "type": "STD",
+    "return": "void *",
+    "name": "mmap",
+    "args": "void *addr, size_t len, int prot, int flags, int fd, long PAD, off_t pos",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 198,
+    "type": "INDIR",
+    "return": "quad_t",
+    "name": "__syscall",
+    "args": "quad_t code, ... register_t args[SYS_MAXSYSARGS]",
+    "pledge": []
+  },
+  {
+    "num": 199,
+    "type": "STD",
+    "rump": true,
+    "return": "off_t",
+    "name": "lseek",
+    "args": "int fd, int PAD, off_t offset, int whence",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 200,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "truncate",
+    "args": "const char *path, int PAD, off_t length",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 201,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "ftruncate",
+    "args": "int fd, int PAD, off_t length",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 202,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__sysctl",
+    "args": "const int *name, u_int namelen, void *oldv, size_t *oldlenp, const void *newv, size_t newlen",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 203,
+    "type": "STD",
+    "return": "int",
+    "name": "mlock",
+    "args": "const void *addr, size_t len",
+    "pledge": []
+  },
+  {
+    "num": 204,
+    "type": "STD",
+    "return": "int",
+    "name": "munlock",
+    "args": "const void *addr, size_t len",
+    "pledge": []
+  },
+  {
+    "num": 205,
+    "type": "STD",
+    "return": "int",
+    "name": "undelete",
+    "args": "const char *path",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 206,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "futimes",
+    "args": "int fd, const struct timeval50 *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 207,
+    "type": "STD",
+    "rump": true,
+    "return": "pid_t",
+    "name": "getpgid",
+    "args": "pid_t pid",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 208,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "reboot",
+    "args": "int opt, char *bootstr",
+    "pledge": []
+  },
+  {
+    "num": 209,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "poll",
+    "args": "struct pollfd *fds, u_int nfds, int timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; Syscalls 210-219 are reserved for dynamically loaded syscalls"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "num": 210,
+    "type": "EXTERN",
+    "modular": "openafs",
+    "return": "int",
+    "name": "afssys",
+    "args": "long id, long a1, long a2, long a3, long a4, long a5, long a6",
+    "pledge": []
+  },
+  {
+    "num": 211,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 212,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 213,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 214,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 215,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 216,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 217,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 218,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 219,
+    "type": "UNIMPL"
+  },
+  {
+    "type": "raw",
+    "text": "; System calls 220-300 are reserved for use by NetBSD"
+  },
+  {
+    "num": 220,
+    "type": "COMPAT_14",
+    "modular": "compat_sysv_14",
+    "return": "int",
+    "name": "__semctl",
+    "args": "int semid, int semnum, int cmd, union __semun *arg",
+    "pledge": []
+  },
+  {
+    "num": 221,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "semget",
+    "args": "key_t key, int nsems, int semflg",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 222,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "semop",
+    "args": "int semid, struct sembuf *sops, size_t nsops",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 223,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "semconfig",
+    "args": "int flag",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 224,
+    "type": "COMPAT_14",
+    "modular": "compat_sysv_14",
+    "return": "int",
+    "name": "msgctl",
+    "args": "int msqid, int cmd, struct msqid_ds14 *buf",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 225,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "msgget",
+    "args": "key_t key, int msgflg",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 226,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "msgsnd",
+    "args": "int msqid, const void *msgp, size_t msgsz, int msgflg",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 227,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "ssize_t",
+    "name": "msgrcv",
+    "args": "int msqid, void *msgp, size_t msgsz, long msgtyp, int msgflg",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 228,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "void *",
+    "name": "shmat",
+    "args": "int shmid, const void *shmaddr, int shmflg",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 229,
+    "type": "COMPAT_14",
+    "modular": "compat_sysv_14",
+    "return": "int",
+    "name": "shmctl",
+    "args": "int shmid, int cmd, struct shmid_ds14 *buf",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 230,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "shmdt",
+    "args": "const void *shmaddr",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 231,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "shmget",
+    "args": "key_t key, size_t size, int shmflg",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 232,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "clock_gettime",
+    "args": "clockid_t clock_id, struct timespec50 *tp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 233,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "clock_settime",
+    "args": "clockid_t clock_id, const struct timespec50 *tp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 234,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "clock_getres",
+    "args": "clockid_t clock_id, struct timespec50 *tp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 235,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "timer_create",
+    "args": "clockid_t clock_id, struct sigevent *evp, timer_t *timerid",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 236,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "timer_delete",
+    "args": "timer_t timerid",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 237,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "timer_settime",
+    "args": "timer_t timerid, int flags, const struct itimerspec50 *value, struct itimerspec50 *ovalue",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 238,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "timer_gettime",
+    "args": "timer_t timerid, struct itimerspec50 *value",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 239,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "timer_getoverrun",
+    "args": "timer_t timerid",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; Syscalls 240-269 are reserved for other IEEE Std1003.1b syscalls"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "num": 240,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "nanosleep",
+    "args": "const struct timespec50 *rqtp, struct timespec50 *rmtp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 241,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fdatasync",
+    "args": "int fd",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 242,
+    "type": "STD",
+    "return": "int",
+    "name": "mlockall",
+    "args": "int flags",
+    "pledge": []
+  },
+  {
+    "num": 243,
+    "type": "STD",
+    "return": "int",
+    "name": "munlockall",
+    "args": "void",
+    "pledge": []
+  },
+  {
+    "num": 244,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "__sigtimedwait",
+    "args": "const sigset_t *set, siginfo_t *info, struct timespec50 *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 245,
+    "type": "STD",
+    "return": "int",
+    "name": "sigqueueinfo",
+    "args": "pid_t pid, const siginfo_t *info",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 246,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "modctl",
+    "args": "int cmd, void *arg",
+    "pledge": []
+  },
+  {
+    "num": 247,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_init",
+    "args": "unsigned int value, intptr_t *idp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 248,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_open",
+    "args": "const char *name, int oflag, mode_t mode, unsigned int value, intptr_t *idp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 249,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_unlink",
+    "args": "const char *name",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 250,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_close",
+    "args": "intptr_t id",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 251,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_post",
+    "args": "intptr_t id",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 252,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_wait",
+    "args": "intptr_t id",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 253,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_trywait",
+    "args": "intptr_t id",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 254,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_getvalue",
+    "args": "intptr_t id, unsigned int *value",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 255,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_destroy",
+    "args": "intptr_t id",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 256,
+    "type": "STD",
+    "modular": "ksem",
+    "rump": true,
+    "return": "int",
+    "name": "_ksem_timedwait",
+    "args": "intptr_t id, const struct timespec *abstime",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 257,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "mqd_t",
+    "name": "mq_open",
+    "args": "const char * name, int oflag, mode_t mode, struct mq_attr *attr",
+    "pledge": []
+  },
+  {
+    "num": 258,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "name": "mq_close",
+    "args": "mqd_t mqdes",
+    "pledge": []
+  },
+  {
+    "num": 259,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "name": "mq_unlink",
+    "args": "const char *name",
+    "pledge": []
+  },
+  {
+    "num": 260,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "name": "mq_getattr",
+    "args": "mqd_t mqdes, struct mq_attr *mqstat",
+    "pledge": []
+  },
+  {
+    "num": 261,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "name": "mq_setattr",
+    "args": "mqd_t mqdes, const struct mq_attr *mqstat, struct mq_attr *omqstat",
+    "pledge": []
+  },
+  {
+    "num": 262,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "name": "mq_notify",
+    "args": "mqd_t mqdes, const struct sigevent *notification",
+    "pledge": []
+  },
+  {
+    "num": 263,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "name": "mq_send",
+    "args": "mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio",
+    "pledge": []
+  },
+  {
+    "num": 264,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "ssize_t",
+    "name": "mq_receive",
+    "args": "mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio",
+    "pledge": []
+  },
+  {
+    "num": 265,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "mq_timedsend",
+    "args": "mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio, const struct timespec50 *abs_timeout",
+    "pledge": []
+  },
+  {
+    "num": 266,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "ssize_t",
+    "name": "mq_timedreceive",
+    "args": "mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio, const struct timespec50 *abs_timeout",
+    "pledge": []
+  },
+  {
+    "num": 267,
+    "type": "STD",
+    "return": "int",
+    "name": "eventfd",
+    "args": "unsigned int val, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 268,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 269,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 270,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__posix_rename",
+    "args": "const char *from, const char *to",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 271,
+    "type": "STD",
+    "return": "int",
+    "name": "swapctl",
+    "args": "int cmd, void *arg, int misc",
+    "pledge": []
+  },
+  {
+    "num": 272,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "getdents",
+    "args": "int fd, char *buf, size_t count",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 273,
+    "type": "STD",
+    "return": "int",
+    "name": "minherit",
+    "args": "void *addr, size_t len, int inherit",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 274,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "lchmod",
+    "args": "const char *path, mode_t mode",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 275,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "lchown",
+    "args": "const char *path, uid_t uid, gid_t gid",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 276,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "lutimes",
+    "args": "const char *path, const struct timeval50 *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 277,
+    "type": "STD",
+    "return": "int",
+    "compat": "13",
+    "name": "msync",
+    "args": "void *addr, size_t len, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 278,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "compat": "13",
+    "name": "stat",
+    "args": "const char *path, struct stat13 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 279,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "compat": "13",
+    "name": "fstat",
+    "args": "int fd, struct stat13 *sb",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 280,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "compat": "13",
+    "name": "lstat",
+    "args": "const char *path, struct stat13 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 281,
+    "type": "STD",
+    "return": "int",
+    "compat": "14",
+    "name": "sigaltstack",
+    "args": "const stack_t *nss, stack_t *oss",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 282,
+    "type": "STD",
+    "return": "int",
+    "compat": "14",
+    "name": "vfork",
+    "args": "void",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 283,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__posix_chown",
+    "args": "const char *path, uid_t uid, gid_t gid",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 284,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__posix_fchown",
+    "args": "int fd, uid_t uid, gid_t gid",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 285,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__posix_lchown",
+    "args": "const char *path, uid_t uid, gid_t gid",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 286,
+    "type": "STD",
+    "rump": true,
+    "return": "pid_t",
+    "name": "getsid",
+    "args": "pid_t pid",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 287,
+    "type": "STD",
+    "return": "pid_t",
+    "name": "__clone",
+    "args": "int flags, void *stack",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 288,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fktrace",
+    "args": "int fd, int ops, int facs, pid_t pid",
+    "pledge": []
+  },
+  {
+    "num": 289,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "preadv",
+    "args": "int fd, const struct iovec *iovp, int iovcnt, int PAD, off_t offset",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 290,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "pwritev",
+    "args": "int fd, const struct iovec *iovp, int iovcnt, int PAD, off_t offset",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 291,
+    "type": "COMPAT_16",
+    "modular": "compat_16",
+    "return": "int",
+    "compat": "14",
+    "name": "sigaction",
+    "args": "int signum, const struct sigaction *nsa, struct sigaction *osa",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 292,
+    "type": "STD",
+    "return": "int",
+    "compat": "14",
+    "name": "sigpending",
+    "args": "sigset_t *set",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 293,
+    "type": "STD",
+    "return": "int",
+    "compat": "14",
+    "name": "sigprocmask",
+    "args": "int how, const sigset_t *set, sigset_t *oset",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 294,
+    "type": "STD",
+    "return": "int",
+    "compat": "14",
+    "name": "sigsuspend",
+    "args": "const sigset_t *set",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 295,
+    "type": "COMPAT_16",
+    "modular": "compat_16",
+    "return": "int",
+    "compat": "14",
+    "name": "sigreturn",
+    "args": "struct sigcontext *sigcntxp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 296,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__getcwd",
+    "args": "char *bufp, size_t length",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 297,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchroot",
+    "args": "int fd",
+    "pledge": []
+  },
+  {
+    "num": 298,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "fhopen",
+    "args": "const struct compat_30_fhandle *fhp, int flags",
+    "pledge": []
+  },
+  {
+    "num": 299,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "fhstat",
+    "args": "const struct compat_30_fhandle *fhp, struct stat13 *sb",
+    "pledge": []
+  },
+  {
+    "num": 300,
+    "type": "COMPAT_20",
+    "modular": "compat_20",
+    "return": "int",
+    "name": "fhstatfs",
+    "args": "const struct compat_30_fhandle *fhp, struct statfs12 *buf",
+    "pledge": []
+  },
+  {
+    "num": 301,
+    "type": "COMPAT_50",
+    "modular": "compat_sysv_50",
+    "return": "int",
+    "compat": "13",
+    "name": "__semctl",
+    "args": "int semid, int semnum, int cmd, ... union __semun *arg",
+    "pledge": []
+  },
+  {
+    "num": 302,
+    "type": "COMPAT_50",
+    "modular": "compat_sysv_50",
+    "return": "int",
+    "compat": "13",
+    "name": "msgctl",
+    "args": "int msqid, int cmd, struct msqid_ds *buf",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 303,
+    "type": "COMPAT_50",
+    "modular": "compat_sysv_50",
+    "return": "int",
+    "compat": "13",
+    "name": "shmctl",
+    "args": "int shmid, int cmd, struct shmid_ds13 *buf",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 304,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "lchflags",
+    "args": "const char *path, u_long flags",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 305,
+    "type": "NOERR",
+    "rump": true,
+    "return": "int",
+    "name": "issetugid",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 306,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "utrace",
+    "args": "const char *label, void *addr, size_t len",
+    "pledge": []
+  },
+  {
+    "num": 307,
+    "type": "STD",
+    "return": "int",
+    "name": "getcontext",
+    "args": "struct __ucontext *ucp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 308,
+    "type": "STD",
+    "return": "int",
+    "name": "setcontext",
+    "args": "const struct __ucontext *ucp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 309,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_create",
+    "args": "const struct __ucontext *ucp, u_long flags, lwpid_t *new_lwp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 310,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_exit",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 311,
+    "type": "STD",
+    "return": "lwpid_t",
+    "name": "_lwp_self",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 312,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_wait",
+    "args": "lwpid_t wait_for, lwpid_t *departed",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 313,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_suspend",
+    "args": "lwpid_t target",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 314,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_continue",
+    "args": "lwpid_t target",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 315,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_wakeup",
+    "args": "lwpid_t target",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 316,
+    "type": "STD",
+    "return": "void *",
+    "name": "_lwp_getprivate",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 317,
+    "type": "STD",
+    "return": "void",
+    "name": "_lwp_setprivate",
+    "args": "void *ptr",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 318,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_kill",
+    "args": "lwpid_t target, int signo",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 319,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_detach",
+    "args": "lwpid_t target",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 320,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "return": "int",
+    "name": "_lwp_park",
+    "args": "const struct timespec50 *ts, lwpid_t unpark, const void *hint, const void *unparkhint",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 321,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_unpark",
+    "args": "lwpid_t target, const void *hint",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 322,
+    "type": "STD",
+    "return": "ssize_t",
+    "name": "_lwp_unpark_all",
+    "args": "const lwpid_t *targets, size_t ntargets, const void *hint",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 323,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_setname",
+    "args": "lwpid_t target, const char *name",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 324,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_getname",
+    "args": "lwpid_t target, char *name, size_t len",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 325,
+    "type": "STD",
+    "return": "int",
+    "name": "_lwp_ctl",
+    "args": "int features, struct lwpctl **address",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": "; Syscalls 326-339 reserved for LWP syscalls."
+  },
+  {
+    "num": 326,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 327,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 328,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 329,
+    "type": "UNIMPL"
+  },
+  {
+    "type": "raw",
+    "text": "; SA system calls."
+  },
+  {
+    "num": 330,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "sa_register",
+    "args": "void *newv, void **oldv, int flags, ssize_t stackinfo_offset",
+    "pledge": []
+  },
+  {
+    "num": 331,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "sa_stacks",
+    "args": "int num, stack_t *stacks",
+    "pledge": []
+  },
+  {
+    "num": 332,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "sa_enable",
+    "args": "void",
+    "pledge": []
+  },
+  {
+    "num": 333,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "sa_setconcurrency",
+    "args": "int concurrency",
+    "pledge": []
+  },
+  {
+    "num": 334,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "sa_yield",
+    "args": "void",
+    "pledge": []
+  },
+  {
+    "num": 335,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "sa_preempt",
+    "args": "int sa_id",
+    "pledge": []
+  },
+  {
+    "num": 336,
+    "type": "OBSOL",
+    "comment": "sys_sa_unblockyield"
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "type": "raw",
+    "text": "; Syscalls 337-339 are reserved for other scheduler activation syscalls."
+  },
+  {
+    "type": "raw",
+    "text": ";"
+  },
+  {
+    "num": 337,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 338,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 339,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 340,
+    "type": "STD",
+    "return": "int",
+    "name": "__sigaction_sigtramp",
+    "args": "int signum, const struct sigaction *nsa, struct sigaction *osa, const void *tramp, int vers",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 341,
+    "type": "OBSOL",
+    "comment": "sys_pmc_get_info"
+  },
+  {
+    "num": 342,
+    "type": "OBSOL",
+    "comment": "sys_pmc_control"
+  },
+  {
+    "num": 343,
+    "type": "STD",
+    "return": "int",
+    "name": "rasctl",
+    "args": "void *addr, size_t len, int op",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 344,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "kqueue",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 345,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "kevent",
+    "args": "int fd, const struct kevent100 *changelist, size_t nchanges, struct kevent100 *eventlist, size_t nevents, const struct timespec50 *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; Scheduling system calls."
+  },
+  {
+    "num": 346,
+    "type": "STD",
+    "return": "int",
+    "name": "_sched_setparam",
+    "args": "pid_t pid, lwpid_t lid, int policy, const struct sched_param *params",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 347,
+    "type": "STD",
+    "return": "int",
+    "name": "_sched_getparam",
+    "args": "pid_t pid, lwpid_t lid, int *policy, struct sched_param *params",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 348,
+    "type": "STD",
+    "return": "int",
+    "name": "_sched_setaffinity",
+    "args": "pid_t pid, lwpid_t lid, size_t size, const cpuset_t *cpuset",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 349,
+    "type": "STD",
+    "return": "int",
+    "name": "_sched_getaffinity",
+    "args": "pid_t pid, lwpid_t lid, size_t size, cpuset_t *cpuset",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 350,
+    "type": "STD",
+    "return": "int",
+    "name": "sched_yield",
+    "args": "void",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 351,
+    "type": "STD",
+    "return": "int",
+    "name": "_sched_protect",
+    "args": "int priority",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 352,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 353,
+    "type": "UNIMPL"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "num": 354,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fsync_range",
+    "args": "int fd, int flags, off_t start, off_t length",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 355,
+    "type": "STD",
+    "return": "int",
+    "name": "uuidgen",
+    "args": "struct uuid *store, int count",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 356,
+    "type": "COMPAT_90",
+    "modular": "compat_90",
+    "return": "int",
+    "name": "getvfsstat",
+    "args": "struct statvfs90 *buf, size_t bufsize, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 357,
+    "type": "COMPAT_90",
+    "modular": "compat_90",
+    "return": "int",
+    "name": "statvfs1",
+    "args": "const char *path, struct statvfs90 *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 358,
+    "type": "COMPAT_90",
+    "modular": "compat_90",
+    "return": "int",
+    "name": "fstatvfs1",
+    "args": "int fd, struct statvfs90 *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 359,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "name": "fhstatvfs1",
+    "args": "const struct compat_30_fhandle *fhp, struct statvfs90 *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 360,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattrctl",
+    "args": "const char *path, int cmd, const char *filename, int attrnamespace, const char *attrname",
+    "pledge": []
+  },
+  {
+    "num": 361,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattr_set_file",
+    "args": "const char *path, int attrnamespace, const char *attrname, const void *data, size_t nbytes",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 362,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "extattr_get_file",
+    "args": "const char *path, int attrnamespace, const char *attrname, void *data, size_t nbytes",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 363,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattr_delete_file",
+    "args": "const char *path, int attrnamespace, const char *attrname",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 364,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattr_set_fd",
+    "args": "int fd, int attrnamespace, const char *attrname, const void *data, size_t nbytes",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 365,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "extattr_get_fd",
+    "args": "int fd, int attrnamespace, const char *attrname, void *data, size_t nbytes",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 366,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattr_delete_fd",
+    "args": "int fd, int attrnamespace, const char *attrname",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 367,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattr_set_link",
+    "args": "const char *path, int attrnamespace, const char *attrname, const void *data, size_t nbytes",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 368,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "extattr_get_link",
+    "args": "const char *path, int attrnamespace, const char *attrname, void *data, size_t nbytes",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 369,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "extattr_delete_link",
+    "args": "const char *path, int attrnamespace, const char *attrname",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 370,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "extattr_list_fd",
+    "args": "int fd, int attrnamespace, void *data, size_t nbytes",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 371,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "extattr_list_file",
+    "args": "const char *path, int attrnamespace, void *data, size_t nbytes",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 372,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "extattr_list_link",
+    "args": "const char *path, int attrnamespace, void *data, size_t nbytes",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 373,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "pselect",
+    "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, const struct timespec50 *ts, const sigset_t *mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 374,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "name": "pollts",
+    "args": "struct pollfd *fds, u_int nfds, const struct timespec50 *ts, const sigset_t *mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 375,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "setxattr",
+    "args": "const char *path, const char *name, const void *value, size_t size, int flags",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 376,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "lsetxattr",
+    "args": "const char *path, const char *name, const void *value, size_t size, int flags",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 377,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fsetxattr",
+    "args": "int fd, const char *name, const void *value, size_t size, int flags",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 378,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "getxattr",
+    "args": "const char *path, const char *name, void *value, size_t size",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 379,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "lgetxattr",
+    "args": "const char *path, const char *name, void *value, size_t size",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 380,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fgetxattr",
+    "args": "int fd, const char *name, void *value, size_t size",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 381,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "listxattr",
+    "args": "const char *path, char *list, size_t size",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 382,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "llistxattr",
+    "args": "const char *path, char *list, size_t size",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 383,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "flistxattr",
+    "args": "int fd, char *list, size_t size",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 384,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "removexattr",
+    "args": "const char *path, const char *name",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 385,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "lremovexattr",
+    "args": "const char *path, const char *name",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 386,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fremovexattr",
+    "args": "int fd, const char *name",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 387,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "compat": "30",
+    "name": "stat",
+    "args": "const char *path, struct stat30 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 388,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "compat": "30",
+    "name": "fstat",
+    "args": "int fd, struct stat30 *sb",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 389,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "compat": "30",
+    "name": "lstat",
+    "args": "const char *path, struct stat30 *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 390,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "30",
+    "name": "getdents",
+    "args": "int fd, char *buf, size_t count",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 391,
+    "type": "IGNORED",
+    "comment": "old posix_fadvise"
+  },
+  {
+    "num": 392,
+    "type": "COMPAT_30",
+    "modular": "compat_30",
+    "return": "int",
+    "compat": "30",
+    "name": "fhstat",
+    "args": "const struct compat_30_fhandle *fhp, struct stat30 *sb",
+    "pledge": []
+  },
+  {
+    "num": 393,
+    "type": "COMPAT_50",
+    "modular": "compat_30",
+    "return": "int",
+    "compat": "30",
+    "name": "ntp_gettime",
+    "args": "struct ntptimeval50 *ntvp",
+    "pledge": []
+  },
+  {
+    "num": 394,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "30",
+    "name": "socket",
+    "args": "int domain, int type, int protocol",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 395,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "30",
+    "name": "getfh",
+    "args": "const char *fname, void *fhp, size_t *fh_size",
+    "pledge": []
+  },
+  {
+    "num": 396,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "40",
+    "name": "fhopen",
+    "args": "const void *fhp, size_t fh_size, int flags",
+    "pledge": []
+  },
+  {
+    "num": 397,
+    "type": "COMPAT_90",
+    "modular": "compat_90",
+    "return": "int",
+    "name": "fhstatvfs1",
+    "args": "const void *fhp, size_t fh_size, struct statvfs90 *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 398,
+    "type": "COMPAT_50",
+    "modular": "compat_50",
+    "rump": true,
+    "return": "int",
+    "compat": "40",
+    "name": "fhstat",
+    "args": "const void *fhp, size_t fh_size, struct stat30 *sb",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; Asynchronous I/O system calls"
+  },
+  {
+    "num": 399,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "aio_cancel",
+    "args": "int fildes, struct aiocb *aiocbp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 400,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "aio_error",
+    "args": "const struct aiocb *aiocbp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 401,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "aio_fsync",
+    "args": "int op, struct aiocb *aiocbp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 402,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "aio_read",
+    "args": "struct aiocb *aiocbp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 403,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "aio_return",
+    "args": "struct aiocb *aiocbp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 404,
+    "type": "COMPAT_50",
+    "modular": "compat",
+    "return": "int",
+    "name": "aio_suspend",
+    "args": "const struct aiocb *const *list, int nent, const struct timespec50 *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 405,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "aio_write",
+    "args": "struct aiocb *aiocbp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 406,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "name": "lio_listio",
+    "args": "int mode, struct aiocb *const *list, int nent, struct sigevent *sig",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "num": 407,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 408,
+    "type": "UNIMPL"
+  },
+  {
+    "num": 409,
+    "type": "UNIMPL"
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "num": 410,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "mount",
+    "args": "const char *type, const char *path, int flags, void *data, size_t data_len",
+    "pledge": []
+  },
+  {
+    "num": 411,
+    "type": "STD",
+    "return": "void *",
+    "name": "mremap",
+    "args": "void *old_address, size_t old_size, void *new_address, size_t new_size, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": ""
+  },
+  {
+    "type": "raw",
+    "text": "; Processor-sets system calls"
+  },
+  {
+    "num": 412,
+    "type": "STD",
+    "return": "int",
+    "name": "pset_create",
+    "args": "psetid_t *psid",
+    "pledge": []
+  },
+  {
+    "num": 413,
+    "type": "STD",
+    "return": "int",
+    "name": "pset_destroy",
+    "args": "psetid_t psid",
+    "pledge": []
+  },
+  {
+    "num": 414,
+    "type": "STD",
+    "return": "int",
+    "name": "pset_assign",
+    "args": "psetid_t psid, cpuid_t cpuid, psetid_t *opsid",
+    "pledge": []
+  },
+  {
+    "num": 415,
+    "type": "STD",
+    "return": "int",
+    "name": "_pset_bind",
+    "args": "idtype_t idtype, id_t first_id, id_t second_id, psetid_t psid, psetid_t *opsid",
+    "pledge": []
+  },
+  {
+    "num": 416,
+    "type": "NOERR",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "posix_fadvise",
+    "args": "int fd, int PAD, off_t offset, off_t len, int advice",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 417,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "select",
+    "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, struct timeval *tv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 418,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "gettimeofday",
+    "args": "struct timeval *tp, void *tzp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 419,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "settimeofday",
+    "args": "const struct timeval *tv, const void *tzp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 420,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "utimes",
+    "args": "const char *path, const struct timeval *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 421,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "adjtime",
+    "args": "const struct timeval *delta, struct timeval *olddelta",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 422,
+    "type": "STD",
+    "modular": "lfs",
+    "return": "int",
+    "compat": "50",
+    "name": "lfs_segwait",
+    "args": "fsid_t *fsidp, struct timeval *tv",
+    "pledge": []
+  },
+  {
+    "num": 423,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "futimes",
+    "args": "int fd, const struct timeval *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 424,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "lutimes",
+    "args": "const char *path, const struct timeval *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 425,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "setitimer",
+    "args": "int which, const struct itimerval *itv, struct itimerval *oitv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 426,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "getitimer",
+    "args": "int which, struct itimerval *itv",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 427,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "clock_gettime",
+    "args": "clockid_t clock_id, struct timespec *tp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 428,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "clock_settime",
+    "args": "clockid_t clock_id, const struct timespec *tp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 429,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "clock_getres",
+    "args": "clockid_t clock_id, struct timespec *tp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 430,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "nanosleep",
+    "args": "const struct timespec *rqtp, struct timespec *rmtp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 431,
+    "type": "STD",
+    "return": "int",
+    "compat": "50",
+    "name": "__sigtimedwait",
+    "args": "const sigset_t *set, siginfo_t *info, struct timespec *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 432,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "int",
+    "compat": "50",
+    "name": "mq_timedsend",
+    "args": "mqd_t mqdes, const char *msg_ptr, size_t msg_len, unsigned msg_prio, const struct timespec *abs_timeout",
+    "pledge": []
+  },
+  {
+    "num": 433,
+    "type": "STD",
+    "modular": "mqueue",
+    "return": "ssize_t",
+    "compat": "50",
+    "name": "mq_timedreceive",
+    "args": "mqd_t mqdes, char *msg_ptr, size_t msg_len, unsigned *msg_prio, const struct timespec *abs_timeout",
+    "pledge": []
+  },
+  {
+    "num": 434,
+    "type": "COMPAT_60",
+    "modular": "compat_60",
+    "return": "int",
+    "name": "_lwp_park",
+    "args": "const struct timespec *ts, lwpid_t unpark, const void *hint, const void *unparkhint",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 435,
+    "type": "COMPAT_100",
+    "modular": "compat_100",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "kevent",
+    "args": "int fd, const struct kevent100 *changelist, size_t nchanges, struct kevent100 *eventlist, size_t nevents, const struct timespec *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 436,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "pselect",
+    "args": "int nd, fd_set *in, fd_set *ou, fd_set *ex, const struct timespec *ts, const sigset_t *mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 437,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "pollts",
+    "args": "struct pollfd *fds, u_int nfds, const struct timespec *ts, const sigset_t *mask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 438,
+    "type": "STD",
+    "modular": "aio",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "aio_suspend",
+    "args": "const struct aiocb *const *list, int nent, const struct timespec *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 439,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "stat",
+    "args": "const char *path, struct stat *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 440,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "fstat",
+    "args": "int fd, struct stat *sb",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 441,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "lstat",
+    "args": "const char *path, struct stat *ub",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 442,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "compat": "50",
+    "name": "__semctl",
+    "args": "int semid, int semnum, int cmd, ... union __semun *arg",
+    "pledge": []
+  },
+  {
+    "num": 443,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "compat": "50",
+    "name": "shmctl",
+    "args": "int shmid, int cmd, struct shmid_ds *buf",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 444,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "compat": "50",
+    "name": "msgctl",
+    "args": "int msqid, int cmd, struct msqid_ds *buf",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 445,
+    "type": "STD",
+    "return": "int",
+    "compat": "50",
+    "name": "getrusage",
+    "args": "int who, struct rusage *rusage",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 446,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "timer_settime",
+    "args": "timer_t timerid, int flags, const struct itimerspec *value, struct itimerspec *ovalue",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 447,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "timer_gettime",
+    "args": "timer_t timerid, struct itimerspec *value",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "type": "raw",
+    "text": "#if defined(NTP) || !defined(_KERNEL_OPT)"
+  },
+  {
+    "num": 448,
+    "type": "STD",
+    "return": "int",
+    "compat": "50",
+    "name": "ntp_gettime",
+    "args": "struct ntptimeval *ntvp",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "#else"
+  },
+  {
+    "num": 448,
+    "type": "EXCL",
+    "comment": "___ntp_gettime50"
+  },
+  {
+    "type": "raw",
+    "text": "#endif"
+  },
+  {
+    "num": 449,
+    "type": "STD",
+    "return": "int",
+    "compat": "50",
+    "name": "wait4",
+    "args": "pid_t pid, int *status, int options, struct rusage *rusage",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 450,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "mknod",
+    "args": "const char *path, mode_t mode, dev_t dev",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 451,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "50",
+    "name": "fhstat",
+    "args": "const void *fhp, size_t fh_size, struct stat *sb",
+    "pledge": []
+  },
+  {
+    "type": "raw",
+    "text": "; 452 only ever appeared in 5.99.x and can be reused after netbsd-7"
+  },
+  {
+    "num": 452,
+    "type": "OBSOL",
+    "comment": "5.99 quotactl"
+  },
+  {
+    "num": 453,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "pipe2",
+    "args": "int *fildes, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 454,
+    "type": "COMPAT_100",
+    "modular": "compat_100",
+    "rump": true,
+    "return": "int",
+    "name": "dup3",
+    "args": "int from, int to, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 455,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "kqueue1",
+    "args": "int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 456,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "paccept",
+    "args": "int s, struct sockaddr *name, socklen_t *anamelen, const sigset_t *mask, int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 457,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "linkat",
+    "args": "int fd1, const char *name1, int fd2, const char *name2, int flags",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 458,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "renameat",
+    "args": "int fromfd, const char *from, int tofd, const char *to",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 459,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "mkfifoat",
+    "args": "int fd, const char *path, mode_t mode",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 460,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "mknodat",
+    "args": "int fd, const char *path, mode_t mode, int PAD, dev_t dev",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 461,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "mkdirat",
+    "args": "int fd, const char *path, mode_t mode",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 462,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "faccessat",
+    "args": "int fd, const char *path, int amode, int flag",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 463,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchmodat",
+    "args": "int fd, const char *path, mode_t mode, int flag",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 464,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fchownat",
+    "args": "int fd, const char *path, uid_t owner, gid_t group, int flag",
+    "pledge": [
+      "chown"
+    ]
+  },
+  {
+    "num": 465,
+    "type": "STD",
+    "return": "int",
+    "name": "fexecve",
+    "args": "int fd, char * const *argp, char * const *envp",
+    "pledge": [
+      "exec"
+    ]
+  },
+  {
+    "num": 466,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fstatat",
+    "args": "int fd, const char *path, struct stat *buf, int flag",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 467,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "utimensat",
+    "args": "int fd, const char *path, const struct timespec *tptr, int flag",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 468,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "openat",
+    "args": "int fd, const char *path, int oflags, ... mode_t mode",
+    "pledge": [
+      "inet",
+      "rpath",
+      "wpath",
+      "cpath"
+    ]
+  },
+  {
+    "num": 469,
+    "type": "STD",
+    "rump": true,
+    "return": "ssize_t",
+    "name": "readlinkat",
+    "args": "int fd, const char *path, char *buf, size_t bufsize",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 470,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "symlinkat",
+    "args": "const char *path1, int fd, const char *path2",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 471,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "unlinkat",
+    "args": "int fd, const char *path, int flag",
+    "pledge": [
+      "cpath"
+    ]
+  },
+  {
+    "num": 472,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "futimens",
+    "args": "int fd, const struct timespec *tptr",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 473,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "__quotactl",
+    "args": "const char *path, struct quotactl_args *args",
+    "pledge": []
+  },
+  {
+    "num": 474,
+    "type": "NOERR",
+    "return": "int",
+    "name": "posix_spawn",
+    "args": "pid_t *pid, const char *path, const struct posix_spawn_file_actions *file_actions, const struct posix_spawnattr *attrp, char *const *argv, char *const *envp",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 475,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "recvmmsg",
+    "args": "int s, struct mmsghdr *mmsg, unsigned int vlen, unsigned int flags, struct timespec *timeout",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 476,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "sendmmsg",
+    "args": "int s, struct mmsghdr *mmsg, unsigned int vlen, unsigned int flags",
+    "pledge": [
+      "inet",
+      "unix"
+    ]
+  },
+  {
+    "num": 477,
+    "type": "NOERR",
+    "rump": true,
+    "return": "int",
+    "name": "clock_nanosleep",
+    "args": "clockid_t clock_id, int flags, const struct timespec *rqtp, struct timespec *rmtp",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 478,
+    "type": "STD",
+    "return": "int",
+    "compat": "60",
+    "name": "_lwp_park",
+    "args": "clockid_t clock_id, int flags, struct timespec *ts, lwpid_t unpark, const void *hint, const void *unparkhint",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 479,
+    "type": "NOERR",
+    "rump": true,
+    "return": "int",
+    "name": "posix_fallocate",
+    "args": "int fd, int PAD, off_t pos, off_t len",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 480,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "fdiscard",
+    "args": "int fd, int PAD, off_t pos, off_t len",
+    "pledge": [
+      "wpath"
+    ]
+  },
+  {
+    "num": 481,
+    "type": "STD",
+    "return": "int",
+    "name": "wait6",
+    "args": "idtype_t idtype, id_t id, int *status, int options, struct wrusage *wru, siginfo_t *info",
+    "pledge": [
+      "proc"
+    ]
+  },
+  {
+    "num": 482,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "name": "clock_getcpuclockid2",
+    "args": "idtype_t idtype, id_t id, clockid_t *clock_id",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 483,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "90",
+    "name": "getvfsstat",
+    "args": "struct statvfs *buf, size_t bufsize, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 484,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "90",
+    "name": "statvfs1",
+    "args": "const char *path, struct statvfs *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 485,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "90",
+    "name": "fstatvfs1",
+    "args": "int fd, struct statvfs *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 486,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "90",
+    "name": "fhstatvfs1",
+    "args": "const void *fhp, size_t fh_size, struct statvfs *buf, int flags",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 487,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_get_link",
+    "args": "const char *path, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 488,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_set_link",
+    "args": "const char *path, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 489,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_delete_link",
+    "args": "const char *path, acl_type_t type",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 490,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_aclcheck_link",
+    "args": "const char *path, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 491,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_get_file",
+    "args": "const char *path, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 492,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_set_file",
+    "args": "const char *path, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 493,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_get_fd",
+    "args": "int filedes, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 494,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_set_fd",
+    "args": "int filedes, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 495,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_delete_file",
+    "args": "const char *path, acl_type_t type",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 496,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_delete_fd",
+    "args": "int filedes, acl_type_t type",
+    "pledge": [
+      "fattr"
+    ]
+  },
+  {
+    "num": 497,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_aclcheck_file",
+    "args": "const char *path, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 498,
+    "type": "STD",
+    "return": "int",
+    "name": "__acl_aclcheck_fd",
+    "args": "int filedes, acl_type_t type, struct acl *aclp",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 499,
+    "type": "STD",
+    "rump": true,
+    "return": "long",
+    "name": "lpathconf",
+    "args": "const char *path, int name",
+    "pledge": [
+      "rpath"
+    ]
+  },
+  {
+    "num": 500,
+    "type": "STD",
+    "return": "int",
+    "name": "memfd_create",
+    "args": "const char *name, unsigned int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 501,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "100",
+    "name": "kevent",
+    "args": "int fd, const struct kevent *changelist, size_t nchanges, struct kevent *eventlist, size_t nevents, const struct timespec *timeout",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 502,
+    "type": "STD",
+    "return": "int",
+    "name": "epoll_create1",
+    "args": "int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 503,
+    "type": "STD",
+    "return": "int",
+    "name": "epoll_ctl",
+    "args": "int epfd, int op, int fd, struct epoll_event *event",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 504,
+    "type": "STD",
+    "return": "int",
+    "name": "epoll_pwait2",
+    "args": "int epfd, struct epoll_event *events, int maxevents, const struct timespec *timeout, const sigset_t *sigmask",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 505,
+    "type": "STD",
+    "rump": true,
+    "return": "int",
+    "compat": "100",
+    "name": "dup3",
+    "args": "int from, int to, int flags",
+    "pledge": [
+      "stdio"
+    ]
+  },
+  {
+    "num": 506,
+    "type": "STD",
+    "modular": "sysv_ipc",
+    "return": "int",
+    "name": "semtimedop",
+    "args": "int semid, struct sembuf *sops, size_t nsops, struct timespec *timeout",
+    "pledge": [
+      "sysv_ipc"
+    ]
+  },
+  {
+    "num": 507,
+    "type": "STD",
+    "return": "int",
+    "name": "pledge",
+    "args": "const char *promises, const char *execpromises",
+    "pledge": [
+      "always"
+    ]
+  }
+]
