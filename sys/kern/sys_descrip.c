@@ -329,11 +329,6 @@ sys_fcntl(struct lwp *l, const struct sys_fcntl_args *uap, register_t *retval)
 		syscallarg(int)		cmd;
 		syscallarg(void *)	arg;
 	} */
-	int fd, i, tmp, error, cmd, newmin;
-	
-	error = pledge_fcntl_check(l, SCARG(uap, cmd));
-	if (error)
-		return error;
 
 	filedesc_t *fdp;
 	fdtab_t *dt;
@@ -342,6 +337,11 @@ sys_fcntl(struct lwp *l, const struct sys_fcntl_args *uap, register_t *retval)
 	struct flock fl;
 	bool cloexec = false;
 	bool clofork = false;
+	int fd, i, tmp, error, cmd, newmin;
+	
+	error = pledge_fcntl_check(l, SCARG(uap, cmd));
+	if (error)
+		return error;
 
 	fd = SCARG(uap, fd);
 	cmd = SCARG(uap, cmd);
