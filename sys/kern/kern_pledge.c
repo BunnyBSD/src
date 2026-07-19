@@ -74,6 +74,8 @@ pledge_check(struct lwp *l, int code)
             return EPERM;
         }
         sigexit(l, SIGABRT);
+        /* NOTREACHED */
+        return EPERM;
     }
 
 
