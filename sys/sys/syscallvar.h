@@ -7,6 +7,9 @@
  * This code is derived from software developed for The NetBSD Foundation
  * by Andrew Doran.
  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -42,6 +45,7 @@
 
 #include <sys/systm.h>
 #include <sys/proc.h>
+#include <sys/pledge.h>
 
 extern struct emul emul_netbsd;
 
@@ -72,6 +76,11 @@ static __inline int
 sy_invoke(const struct sysent *sy, struct lwp *l, const void *uap,
 	register_t *rval, int code)
 {
+#ifdef PLEDGE
+	int pledge_err = pledge_check(l, code);
+	if (pledge_err) 
+		return pledge_err;
+#endif
 	const bool do_trace = l->l_proc->p_trace_enabled &&
 	    (sy->sy_flags & SYCALL_INDIRECT) == 0;
 	int error;
@@ -87,7 +96,7 @@ sy_invoke(const struct sysent *sy, struct lwp *l, const void *uap,
 #if !defined(__mips__) && !defined(__m68k__)
 		/*
 		 * Due to the mips userland code for SYS_break needing v1 to be
-		 * preserved, we can't clear this on mips. 
+		 * preserved, we can't clear this on mips.
 		 */
 		rval[1] = 0;
 #endif

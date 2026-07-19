@@ -697,6 +697,7 @@
 ./usr/share/man/html1/zstdless.html		man-util-htmlman	html
 ./usr/share/man/html1/zstdmt.html		man-util-htmlman	html
 ./usr/share/man/html1/ztest.html		man-zfs-htmlman		zfs,html
+./usr/share/man/html2/pledge.html               comp-c-htmlman          html
 ./usr/share/man/html3/eddsa_pk_new.html			man-util-htmlman	html
 ./usr/share/man/html3/es256_pk_new.html			man-util-htmlman	html
 ./usr/share/man/html3/es384_pk_new.html			man-util-htmlman	html

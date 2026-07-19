@@ -7,6 +7,9 @@
  * This code is derived from software contributed to The NetBSD Foundation
  * by Andrew Doran.
  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team
+ * All right reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -515,7 +518,13 @@ sys_ioctl(struct lwp *l, const struct sys_ioctl_args *uap, register_t *retval)
 	struct file	*fp;
 	proc_t		*p;
 	u_long		com;
+
 	int		error;
+	error = pledge_ioctl_check(l, SCARG(uap, com));
+
+	if (error)
+		return error;
+
 	size_t		size, alloc_size;
 	void 		*data, *memp;
 #define	STK_PARAMS	128

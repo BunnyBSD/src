@@ -2,7 +2,9 @@
 
 /*-
  * Copyright (c) 1999, 2001, 2004, 2006, 2007, 2008, 2019
- *     The NetBSD Foundation, Inc.
+ *     The NetBSD Foundation, Inc. All rights reserved.
+  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team.
  * All rights reserved.
  *
  * This code is derived from software contributed to The NetBSD Foundation
@@ -527,6 +529,11 @@ fork1(struct lwp *l1, int flags, int exitsig, void *stack, size_t stacksize,
 
 	LIST_INSERT_HEAD(&parent->p_children, p2, p_sibling);
 	p2->p_exitsig = exitsig;		/* signal for parent on exit */
+	
+	mutex_enter(p1->p_lock);
+	p2->p_pledge = p1->p_pledge;  /* Pledge from parent */
+	p2->p_pledged = p1->p_pledged;
+	mutex_exit(p1->p_lock);
 
 	/*
 	 * Trace fork(2) and vfork(2)-like events on demand in a debugger.

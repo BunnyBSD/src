@@ -4,6 +4,9 @@
  * Copyright (c) 2008, 2020 The NetBSD Foundation, Inc.
  * All rights reserved.
  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -83,6 +86,7 @@ __KERNEL_RCSID(0, "$NetBSD: sys_descrip.c,v 1.52 2025/07/16 19:14:13 kre Exp $")
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
 #include <sys/kmem.h>
+#include <sys/pledge.h>
 #include <sys/pool.h>
 #include <sys/syslog.h>
 #include <sys/unistd.h>
@@ -328,7 +332,7 @@ sys_fcntl(struct lwp *l, const struct sys_fcntl_args *uap, register_t *retval)
 		syscallarg(int)		cmd;
 		syscallarg(void *)	arg;
 	} */
-	int fd, i, tmp, error, cmd, newmin;
+
 	filedesc_t *fdp;
 	fdtab_t *dt;
 	file_t *fp;
@@ -336,6 +340,11 @@ sys_fcntl(struct lwp *l, const struct sys_fcntl_args *uap, register_t *retval)
 	struct flock fl;
 	bool cloexec = false;
 	bool clofork = false;
+	int fd, i, tmp, error, cmd, newmin;
+	
+	error = pledge_fcntl_check(l, SCARG(uap, cmd));
+	if (error)
+		return error;
 
 	fd = SCARG(uap, fd);
 	cmd = SCARG(uap, cmd);

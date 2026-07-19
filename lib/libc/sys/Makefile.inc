@@ -34,7 +34,7 @@ CLEANFILES+=	${_LSRC:MLintSys*.c}
 # with old syscall interfaces.
 GLUE+= fdiscard.c ftruncate.c lseek.c mmap.c \
 	pread.c preadv.c pwrite.c pwritev.c truncate.c ntp_adjtime.c \
-	mknodat.c 
+	mknodat.c
 GLUENOERR+= posix_fallocate.c
 GLUE50+= adjtime.c clock_settime.c settimeofday.c
 
@@ -140,7 +140,7 @@ ASM=\
 		mprotect.S __msgctl50.S msgget.S munlock.S munlockall.S \
 		munmap.S \
 	nfssvc.S __ntp_gettime50.S \
-	pathconf.S pipe2.S \
+	pathconf.S pipe2.S pledge.S\
 		__posix_chown.S __posix_fchown.S __posix_lchown.S \
 		__posix_rename.S profil.S \
 	__quotactl.S \
@@ -167,7 +167,7 @@ SAASM+=	sa_register.S sa_stacks.S sa_enable.S sa_setconcurrency.S sa_yield.S \
 		sa_preempt.S
 
 # modules with potentially non default implementations
-ASM_MD=	_lwp_getprivate.S mremap.S 
+ASM_MD=	_lwp_getprivate.S mremap.S
 
 .for f in ${ASM_MD}
 . if !exists(${f})
@@ -282,7 +282,7 @@ MAN+=	accept.2 access.2 acct.2 adjtime.2 bind.2 brk.2 chdir.2 \
 	mount.2 \
 	mprotect.2 mremap.2 msgctl.2 msgget.2 msgrcv.2 msgsnd.2 msync.2 \
 	munmap.2 nanosleep.2 nfssvc.2 ntp_adjtime.2 open.2 pathconf.2 pipe.2 \
-	poll.2 posix_fadvise.2 \
+	pledge.2 poll.2 posix_fadvise.2 \
 	profil.2 ptrace.2 __quotactl.2 \
 	rasctl.2 read.2 readlink.2 \
 	reboot.2 recv.2 rename.2 revoke.2 rmdir.2 \
@@ -326,7 +326,7 @@ MLINKS+=access.2 faccessat.2
 MLINKS+=chmod.2 fchmodat.2
 MLINKS+=chown.2 fchownat.2
 MLINKS+=execve.2 fexecve.2
-MLINKS+=fdiscard.2 posix_fallocate.2 
+MLINKS+=fdiscard.2 posix_fallocate.2
 MLINKS+=fhopen.2 fhstat.2 fhopen.2 fhstatvfs.2 fhopen.2 fhstatvfs1.2
 MLINKS+=stat.2 fstatat.2
 MLINKS+=fsync.2 fsync_range.2

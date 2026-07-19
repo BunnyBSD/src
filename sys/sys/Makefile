@@ -32,7 +32,7 @@ INCS=	acct.h acl.h agpio.h aio.h ansi.h aout_mids.h ataio.h atomic.h \
 	malloc.h mallocvar.h mbuf.h md4.h md5.h midiio.h \
 	mman.h module.h mount.h mqueue.h msg.h msgbuf.h mtio.h mutex.h \
 	namei.h null.h \
-	param.h pcu.h pipe.h pmf.h poll.h pool.h power.h proc.h \
+	param.h pcu.h pipe.h pledge.h pmf.h poll.h pool.h power.h proc.h \
 	protosw.h pset.h psref.h ptrace.h ptree.h \
 	queue.h quota.h quotactl.h \
 	radioio.h radixtree.h random.h ras.h rbtree.h reboot.h resource.h \

@@ -7,6 +7,9 @@
  * This code is derived from software contributed to The NetBSD Foundation
  * by Andrew Brown.
  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team.
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -93,6 +96,7 @@ __KERNEL_RCSID(0, "$NetBSD: kern_sysctl.c,v 1.271 2024/09/08 09:36:51 rillig Exp
 #include <sys/syscallargs.h>
 #include <sys/sysctl.h>
 #include <sys/systm.h>
+#include <sys/pledge.h>
 
 #include <crypto/blake2/blake2s.h>
 
@@ -306,6 +310,10 @@ sys___sysctl(struct lwp *l, const struct sys___sysctl_args *uap, register_t *ret
 		       SCARG(uap, namelen) * sizeof(int));
 	if (error)
 		return (error);
+
+	error = pledge_sysctl_check(l, name, SCARG(uap, namelen));
+	if (error)
+		return error;
 
 	ktrmib(name, SCARG(uap, namelen));
 
