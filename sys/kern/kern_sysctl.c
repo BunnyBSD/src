@@ -308,7 +308,7 @@ sys___sysctl(struct lwp *l, const struct sys___sysctl_args *uap, register_t *ret
 	if (error)
 		return (error);
 
-	error = pledge_sysctl_check(l, SCARG(uap, name), SCARG(uap, namelen));
+	error = pledge_sysctl_check(l, name, SCARG(uap, namelen));
 	if (error)
 		return error;
 
