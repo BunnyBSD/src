@@ -1,0 +1,101 @@
+name: Build BunnyBSD
+
+on:
+  push:
+    branches: [ '**' ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ 'dev' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: build-${{ github.ref_name }}-${{ matrix.arch }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    permissions:
+      contents: write
+
+    # build conditions:
+    # runs manually, on PRs to 'dev', and pushes to main or dev,
+    # on tags, and on any other branch if commit message contains '[build]'
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'pull_request' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      startsWith(github.ref, 'refs/tags/') ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[build]'))
+
+    strategy:
+      matrix:
+        include:
+          - arch: "amd64"
+            build_args: "-m amd64"
+          - arch: "arm64"
+            build_args: "-m evbarm -a aarch64"
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    # isolating cache per architecture to prevent file collisions.
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: obj
+        key: ${{ runner.os }}-bunny-build-${{ matrix.arch }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-bunny-build-${{ matrix.arch }}-
+
+    # build release (tools, kernel distribution) and live image
+    - name: Build release and live-image
+      run: |
+        echo "Starting build (output is being redirected to build.log to prevent log spam)..."
+        if ! ./build.sh ${{ matrix.build_args }} -U -u -N 0 -V HOST_CC="cc -std=gnu11" -j$(nproc) release live-image > build.log 2>&1; then
+          echo "::error::Build failed! Showing last 500 lines of build.log:"
+          tail -n 500 build.log
+          exit 1
+        fi
+
+    # save cache only on trusted branches (main and dev) during push events
+    - name: Save cache
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+      uses: actions/cache/save@v4
+      with:
+        path: obj
+        key: ${{ runner.os }}-bunny-build-${{ matrix.arch }}-${{ github.sha }}
+
+    # upload full build log only if the build fails
+    - name: Upload Build Log on Failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-Log-${{ matrix.arch }}
+        path: build.log
+        retention-days: 3
+
+    # if built on a regular branch, upload a temp artifact
+    - name: Upload Temporary Artifact (for branch builds)
+      if: startsWith(github.ref, 'refs/tags/') == false
+      uses: actions/upload-artifact@v4
+      with:
+        name: BunnyBSD-Live-Image-Dev-${{ matrix.arch }}
+        path: obj/releasedir/images/*.img.gz
+        if-no-files-found: error
+        retention-days: 7
+
+    # github release on tag build
+    - name: Create Permanent GitHub Release (for tags)
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        gh release create "$GITHUB_REF_NAME" \
+          --title "$GITHUB_REF_NAME" \
+          --notes "Automated release of BunnyBSD $GITHUB_REF_NAME." || true
+
+        gh release upload "$GITHUB_REF_NAME" obj/releasedir/images/*.img.gz --clobber
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
