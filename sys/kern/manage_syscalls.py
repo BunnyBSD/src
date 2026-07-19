@@ -7,6 +7,7 @@ import json
 import re
 import sys
 import os
+import datetime
 
 MAP_FILE = "pledge_map.json"
 
@@ -33,7 +34,17 @@ def get_target_paths():
     else:
         c_path = "sys_pledge.c"
 
-    return header_path, c_path
+    # Resolve pledge.2 path (should go to lib/libc/sys/pledge.2)
+    if current_dir == "kern" and os.path.exists("../../lib/libc/sys"):
+        man_path = "../../lib/libc/sys/pledge.2"
+    elif os.path.exists("../lib/libc/sys"):
+        man_path = "../lib/libc/sys/pledge.2"
+    elif os.path.exists("lib/libc/sys"):
+        man_path = "lib/libc/sys/pledge.2"
+    else:
+        man_path = "pledge.2"
+
+    return header_path, c_path, man_path
 
 def load_pledge_map():
     """
@@ -124,127 +135,323 @@ def action_import(master_path):
                 raw_lines.append(current_line)
                 current_line = ""
 
-    parsed_data = []
-    in_table = False
-    unclassified_count = 0
+            parsed_data = []
+            in_table = False
+            unclassified_count = 0
 
-    for line in raw_lines:
-        line_stripped = line.strip()
+            for line in raw_lines:
+                line_stripped = line.strip()
 
-        # Handle header section vs syscall table section
-        if not in_table:
-            if line_stripped == "%%":
-                in_table = True
-                parsed_data.append({"type": "raw", "text": "%%"})
-                continue
-            parsed_data.append({"type": "raw", "text": line_stripped})
-            continue
+                # Handle header section vs syscall table section
+                if not in_table:
+                    if line_stripped == "%%":
+                        in_table = True
+                        parsed_data.append({"type": "raw", "text": "%%"})
+                        continue
+                    parsed_data.append({"type": "raw", "text": line_stripped})
+                    continue
 
-        # Handle empty lines, comments, and preprocessor directives
-        if not line_stripped:
-            parsed_data.append({"type": "raw", "text": ""})
-            continue
-        if line_stripped.startswith(";") or line_stripped.startswith("#"):
-            parsed_data.append({"type": "raw", "text": line_stripped})
-            continue
+                # Handle empty lines, comments, and preprocessor directives
+                if not line_stripped:
+                    parsed_data.append({"type": "raw", "text": ""})
+                    continue
+                if line_stripped.startswith(";") or line_stripped.startswith("#"):
+                    parsed_data.append({"type": "raw", "text": line_stripped})
+                    continue
 
-        # Parse active syscalls with curly braces { ... }
-        brace_match = re.match(r"^(\d+)\s+([A-Z0-9_]+)\s*(.*?)\{\s*(.*?)\s*;\s*\}\s*(.*)$", line_stripped)
-        if brace_match:
-            num = int(brace_match.group(1))
-            sc_type = brace_match.group(2)
-            opts_str = brace_match.group(3).strip()
-            proto_str = brace_match.group(4).strip()
-            alias = brace_match.group(5).strip()
+                # Parse active syscalls with curly braces { ... }
+                brace_match = re.match(r"^(\d+)\s+([A-Z0-9_]+)\s*(.*?)\{\s*(.*?)\s*;\s*\}\s*(.*)$", line_stripped)
+                if brace_match:
+                    num = int(brace_match.group(1))
+                    sc_type = brace_match.group(2)
+                    opts_str = brace_match.group(3).strip()
+                    proto_str = brace_match.group(4).strip()
+                    alias = brace_match.group(5).strip()
 
-            entry = {
-                "num": num,
-                "type": sc_type
-            }
+                    entry = {
+                        "num": num,
+                        "type": sc_type
+                    }
 
-            # Parse modular/rump options and compatibility flags
-            opts = opts_str.split()
-            i = 0
-            while i < len(opts):
-                opt = opts[i]
-                if opt == "MODULAR":
-                    if i + 1 < len(opts):
-                        entry["modular"] = opts[i+1]
-                        i += 2
-                    else:
-                        entry["modular"] = True
-                        i += 1
-                elif opt == "RUMP":
-                    entry["rump"] = True
-                    i += 1
-                else:
-                    if "compat_flags" not in entry:
-                        entry["compat_flags"] = []
-                    entry["compat_flags"].append(opt)
-                    i += 1
+                    # Parse modular/rump options and compatibility flags
+                    opts = opts_str.split()
+                    i = 0
+                    while i < len(opts):
+                        opt = opts[i]
+                        if opt == "MODULAR":
+                            if i + 1 < len(opts):
+                                entry["modular"] = opts[i+1]
+                                i += 2
+                            else:
+                                entry["modular"] = True
+                                i += 1
+                        elif opt == "RUMP":
+                            entry["rump"] = True
+                            i += 1
+                        else:
+                            if "compat_flags" not in entry:
+                                entry["compat_flags"] = []
+                            entry["compat_flags"].append(opt)
+                            i += 1
 
-            if alias:
-                entry["alias"] = alias
+                    if alias:
+                        entry["alias"] = alias
 
-            # Parse and clean the prototype string
-            parts = proto_str.split('|')
-            if len(parts) >= 4:
-                return_type = parts[0].strip()
-                compat = parts[2].strip()
-                rest = "|".join(parts[3:])
+                    # Parse and clean the prototype string
+                    parts = proto_str.split('|')
+                    if len(parts) >= 4:
+                        return_type = parts[0].strip()
+                        compat = parts[2].strip()
+                        rest = "|".join(parts[3:])
 
-                match = re.match(r"^([a-zA-Z0-9_]+)\((.*)\)$", rest.strip(), re.DOTALL)
-                if match:
-                    name = match.group(1)
-                    args_raw = match.group(2)
-                    args_clean = re.sub(r'\s+', ' ', args_raw).strip()
+                        match = re.match(r"^([a-zA-Z0-9_]+)\((.*)\)$", rest.strip(), re.DOTALL)
+                        if match:
+                            name = match.group(1)
+                            args_raw = match.group(2)
+                            args_clean = re.sub(r'\s+', ' ', args_raw).strip()
 
-                    entry["return"] = return_type
-                    if compat:
-                        entry["compat"] = compat
-                    entry["name"] = name
-                    entry["args"] = args_clean
+                            entry["return"] = return_type
+                            if compat:
+                                entry["compat"] = compat
+                            entry["name"] = name
+                            entry["args"] = args_clean
 
-                    # Strip ONLY NetBSD compatibility version suffixes (prevents wait4/pipe2 over-stripping)
-                    base_name = re.sub(r'(09|10|12|13|14|16|20|30|40|43|50|60|90|100)$', '', name.lower())
+                            # Strip ONLY NetBSD compatibility version suffixes (prevents wait4/pipe2 over-stripping)
+                            base_name = re.sub(r'(09|10|12|13|14|16|20|30|40|43|50|60|90|100)$', '', name.lower())
+                            
+                            if base_name in pledge_map:
+                                entry["pledge"] = pledge_map[base_name]
+                            else:
+                                # Syscall is not mapped in our dictionary -> Print a warning
+                                print(f"WARNING: Syscall '{name}' (num {num}) is unclassified! Not found in '{MAP_FILE}'.", file=sys.stderr)
+                                unclassified_count += 1
+                                entry["pledge"] = []
                     
-                    if base_name in pledge_map:
-                        entry["pledge"] = pledge_map[base_name]
+                    parsed_data.append(entry)
+                else:
+                    # Parse obsolete, unimplemented, or ignored syscalls without prototypes
+                    no_brace_match = re.match(r"^(\d+)\s+([A-Z0-9_]+)\s*(.*)$", line_stripped)
+                    if no_brace_match:
+                        num = int(no_brace_match.group(1))
+                        sc_type = no_brace_match.group(2)
+                        rest = no_brace_match.group(3).strip()
+
+                        entry = {
+                            "num": num,
+                            "type": sc_type
+                        }
+                        if rest:
+                            entry["comment"] = rest
+                        parsed_data.append(entry)
                     else:
-                        # Syscall is not mapped in our dictionary -> Print a warning
-                        print(f"WARNING: Syscall '{name}' (num {num}) is unclassified! Not found in '{MAP_FILE}'.", file=sys.stderr)
-                        unclassified_count += 1
-                        entry["pledge"] = []
-            
-            parsed_data.append(entry)
-        else:
-            # Parse obsolete, unimplemented, or ignored syscalls without prototypes
-            no_brace_match = re.match(r"^(\d+)\s+([A-Z0-9_]+)\s*(.*)$", line_stripped)
-            if no_brace_match:
-                num = int(no_brace_match.group(1))
-                sc_type = no_brace_match.group(2)
-                rest = no_brace_match.group(3).strip()
+                        # Fallback to raw line preservation
+                        parsed_data.append({"type": "raw", "text": line_stripped})
 
-                entry = {
-                    "num": num,
-                    "type": sc_type
-                }
-                if rest:
-                    entry["comment"] = rest
-                parsed_data.append(entry)
+            # Save to a single clean syscalls.json
+            with open("syscalls.json", "w", encoding="utf-8") as f_json:
+                json.dump(parsed_data, f_json, indent=2, ensure_ascii=False)
+
+            print("\nImport completed.")
+            if unclassified_count > 0:
+                print(f"Notice: Found {unclassified_count} unclassified active system call(s). Check your 'syscalls.json' output.", file=sys.stderr)
             else:
-                # Fallback to raw line preservation
-                parsed_data.append({"type": "raw", "text": line_stripped})
+                print("All active system calls successfully classified.")
 
-    # Save to a single clean syscalls.json
-    with open("syscalls.json", "w", encoding="utf-8") as f_json:
-        json.dump(parsed_data, f_json, indent=2, ensure_ascii=False)
+def generate_pledge_man(data, man_path):
+    """
+    Generates pledge.2 man page dynamically based on active syscall promises in syscalls.json.
+    Only overwrites the file if the content (excluding the date line) has changed.
+    When updated, sets the date to the current date.
+    """
+    today = datetime.date.today()
+    today_str = f"{today.strftime('%B')} {today.day}, {today.year}"
+    
+    groups = {}
+    for entry in data:
+        if entry.get("type") == "raw" or "name" not in entry:
+            continue
+        
+        name = entry["name"]
+        pledges = entry.get("pledge", [])
+        
+        for p in pledges:
+            if p == "always":
+                continue
+            if p not in groups:
+                groups[p] = []
+            groups[p].append(name)
 
-    print("\nImport completed.")
-    if unclassified_count > 0:
-        print(f"Notice: Found {unclassified_count} unclassified active system call(s). Check your 'syscalls.json' output.", file=sys.stderr)
+    promises_markup = []
+    promises_markup.append(".Bl -tag -width \"execpromises\"")
+    
+    for promise in sorted(groups.keys()):
+        promises_markup.append(f".It Sy {promise}")
+        calls = sorted(list(set(groups[promise])))
+        
+        for i, call in enumerate(calls):
+            punct = " ." if i == len(calls) - 1 else " ,"
+            promises_markup.append(f".Xr {call} 2{punct}")
+            
+    promises_markup.append(".El")
+    promises_section = "\n".join(promises_markup)
+
+    new_content = f""".\\"" $BunnyBSD$
+.Dd {today_str}
+.Dt PLEDGE 2
+.Os
+.Sh NAME
+.Nm pledge
+.Nd restrict system operations
+.Sh LIBRARY
+.Lb libc
+.Sh SYNOPSIS
+.In unistd.h
+.Ft int
+.Fn pledge "const char *promises" "const char *execpromises"
+.Sh DESCRIPTION
+The
+.Nm
+system call forces the current process into a restricted operating mode
+where only a subset of system calls can be invoked.
+The subset is defined by the
+.Ar promises
+string, which contains a space-separated list of pledge groups.
+.Pp
+If a process makes a system call that is not permitted by its active promises,
+it is terminated with a
+.Dv SIGABRT
+signal.
+However, if the
+.Dv error
+(or
+.Dv PLEDGE_ERROR )
+promise was requested, the forbidden system call will instead fail with
+.Er EPERM .
+.Pp
+Once a process has pledged, it can make subsequent calls to
+.Nm
+to further restrict its promises.
+It is impossible to request promises that were not already active;
+any attempt to expand the active set will fail with
+.Er EPERM .
+.Pp
+The
+.Ar execpromises
+argument is currently not implemented in BunnyBSD and must be
+.Dv NULL .
+Specifying a non-null value will cause
+.Nm
+to fail with
+.Er ENOSYS .
+.Pp
+Several system calls are restricted based on their arguments:
+.Bl -tag -width "sysctl(2)"
+.It Xr open 2
+Requires
+.Sy rpath
+for read operations,
+.Sy wpath
+for write operations or truncation, and
+.Sy cpath
+if the
+.Dv O_CREAT
+flag is specified.
+.It Xr socket 2
+Requires
+.Sy inet
+for
+.Dv AF_INET
+and
+.Dv AF_INET6
+domains, and
+.Sy unix
+for
+.Dv AF_UNIX .
+Other domains are not permitted.
+.It Xr ioctl 2
+Only specific command groups are allowed.
+TTY commands (group 't') require
+.Sy tty ;
+socket/network commands (group 'i') require
+.Sy inet
+or
+.Sy unix ;
+audio commands (groups 'A' and 'a') require
+.Sy audio ;
+generic file/descriptor operations (group 'f', such as FIONBIO and FIONREAD) are always allowed.
+All other command groups are blocked.
+.It Xr fcntl 2
+Basic operations
+.Pq Dv F_GETFD , F_SETFD , F_GETFL , F_SETFL , F_DUPFD*
+are always allowed.
+Locking operations
+.Pq Dv F_GETLK , F_SETLK , F_SETLKW
+require
+.Sy flock .
+Other commands are blocked.
+.It Xr sysctl 2
+Requires
+.Sy sys_info .
+Only read-only requests for
+.Dv CTL_HW
+and specific
+.Dv CTL_KERN
+nodes
+.Pq KERN_HOSTNAME , KERN_DOMAINNAME , KERN_BOOTTIME , KERN_OSTYPE , KERN_OSRELEASE , KERN_VERSION
+are allowed.
+.El
+.Sh PROMISES
+The following promises are supported, each permitting the associated system calls:
+{promises_section}
+.Sh RETURN VALUES
+Upon successful completion, a value of 0 is returned.
+Otherwise, -1 is returned and the global variable
+.Va errno
+is set to indicate the error.
+.Sh ERRORS
+.Bl -tag -width [EINVAL]
+.It Bq Er EINVAL
+An invalid promise was specified.
+.It Bq Er ENOSYS
+The
+.Ar execpromises
+argument was not
+.Dv NULL .
+This feature is not yet implemented.
+.It Bq Er EPERM
+An attempt was made to request a promise that was not active in the parent process.
+.El
+.Sh SEE ALSO
+.Xr intro 2
+.Sh HISTORY
+The
+.Nm
+system call first appeared in
+.Ox 5.9 .
+It was ported to BunnyBSD in BunnyBSD 0.1.
+"""
+
+    # Helper function to remove the date line (.Dd) for comparison
+    def normalize_content(text):
+        lines = text.strip().splitlines()
+        return "\n".join(line for line in lines if not line.startswith(".Dd"))
+
+    # Determine whether the file actually needs to be written
+    should_write = True
+    if os.path.exists(man_path):
+        with open(man_path, "r", encoding="utf-8") as f:
+            existing_content = f.read()
+        
+        # Compare old and new content without the .Dd line
+        if normalize_content(existing_content) == normalize_content(new_content):
+            should_write = False
+
+    if should_write:
+        print(f"Generating man page at '{man_path}' (content changed, date updated to {today_str})...")
+        with open(man_path, "w", encoding="utf-8") as f_man:
+            f_man.write(new_content)
     else:
-        print("All active system calls successfully classified.")
+        print(f"Man page at '{man_path}' is up to date (no changes detected, date preserved).")
 
 def action_export():
     """
@@ -254,7 +461,7 @@ def action_export():
         print("Error: 'syscalls.json' not found. Run 'import' first.", file=sys.stderr)
         sys.exit(1)
 
-    header_path, c_path = get_target_paths()
+    header_path, c_path, man_path = get_target_paths()
     print(f"Exporting database to build files...")
 
     # Load raw pledge map to find promises for pledge.h generation
@@ -268,7 +475,7 @@ def action_export():
             print(f"Error reading '{MAP_FILE}': {e}", file=sys.stderr)
             sys.exit(1)
     # Exclude system reserved keywords (bypass, forbidden, error) from dynamic bit generation
-    promises = [k for k in raw_map.keys() if k not in ["bypass", "forbidden", "error", "always"]]
+    promises = [k for k in raw_map if k not in ["bypass", "forbidden", "error", "always"]]
     promises.sort()  # Keep defines sorted deterministically
 
     dynamic_defines = []
@@ -443,7 +650,10 @@ __END_DECLS
         f_pledge.write('    { NULL, 0 }\n')
         f_pledge.write("};\n")
 
-    print(f"Success! Generated '{header_path}', 'syscalls.master' and '{c_path}'.")
+    # 4. Generate the man page
+    generate_pledge_man(data, man_path)
+
+    print(f"Success! Generated '{header_path}', 'syscalls.master', '{c_path}' and '{man_path}'.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or sys.argv[1] not in ["import", "export"]:
