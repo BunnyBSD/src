@@ -82,6 +82,7 @@ __KERNEL_RCSID(0, "$NetBSD: uipc_syscalls.c,v 1.215 2025/07/16 19:14:13 kre Exp 
 #include <sys/ktrace.h>
 #include <sys/mbuf.h>
 #include <sys/mount.h>
+#include <sys/pledge.h>
 #include <sys/proc.h>
 #include <sys/protosw.h>
 #include <sys/sdt.h>
@@ -114,6 +115,9 @@ sys___socket30(struct lwp *l, const struct sys___socket30_args *uap,
 		syscallarg(int)	protocol;
 	} */
 	int fd, error;
+	error = pledge_socket_check(l, SCARG(uap, domain));
+	if (error) 
+		return error;
 	file_t *fp;
 
 	error = fsocreate(SCARG(uap, domain), NULL, SCARG(uap, type),

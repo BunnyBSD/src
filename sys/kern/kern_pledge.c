@@ -34,6 +34,7 @@ __KERNEL_RCSID(0, "$BunnyBSD$");
 #include <sys/syscallargs.h>
 #include <sys/pledge.h>
 #include <sys/stdbool.h>
+#include <sys/fcntl.h>
 
 #ifdef PLEDGE
 
@@ -66,6 +67,73 @@ pledge_check(struct lwp *l, int code)
         return true;
 
     return false;
+}
+
+/* gatekeeper for open(2) with pledge */
+int 
+pledge_open_check(struct lwp *l, int flags) 
+{
+    struct proc *p = l->l_proc;
+    if (!p->p_pledged) 
+        return 0;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
+
+    /* O_CREATE require cpath */
+    if (flags & O_CREAT) {
+        if ((mask & PLEDGE_CPATH) == 0) {
+            return EPERM;
+        }
+    }
+
+    /* O_WRONLY, O_RDWR, O_TRUNC require wpath */
+    if ((flags & (O_WRONLY | O_RDWR | O_TRUNC)) != 0) {
+        if ((mask & PLEDGE_WPATH) == 0) {
+            return EPERM;
+        }
+    }
+
+    /* O_RDONLY require rpath */
+    if ((flags & (O_WRONLY | O_RDWR)) == 0) {
+        if ((mask & PLEDGE_RPATH) == 0) {
+            return EPERM;
+        }
+    }
+
+    return 0;
+}
+
+/* gatekeeper for socket(2) with pledge */
+int
+pledge_socket_check(struct lwp *l, int domain)
+{
+    struct proc *p = l->l_proc;
+    if (!p->p_pledged) 
+        return 0;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
+
+    if (domain == AF_INET || domain == AF_INET6) {
+        if ((mask & PLEDGE_INET) == 0) {
+            return EPERM;
+        }
+    }
+
+    else if (domain == AF_UNIX) {
+        if ((mask & PLEDGE_UNIX) == 0) {
+            return EPERM;
+        }
+    }
+
+    else {
+        return EPERM;
+    }
+
+    return 0;
 }
 
 /*

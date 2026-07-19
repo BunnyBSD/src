@@ -100,6 +100,7 @@ __KERNEL_RCSID(0, "$NetBSD: vfs_syscalls.c,v 1.571 2025/07/16 19:14:13 kre Exp $
 #include <sys/module.h>
 #include <sys/mount.h>
 #include <sys/namei.h>
+#include <sys/pledge.h>
 #include <sys/proc.h>
 #include <sys/quota.h>
 #include <sys/quotactl.h>
@@ -1888,6 +1889,11 @@ sys_open(struct lwp *l, const struct sys_open_args *uap, register_t *retval)
 		syscallarg(int) mode;
 	} */
 	int error;
+
+	error = pledge_open_check(l, SCARG(uap, flags));
+	if (error)
+		return error;
+
 	int fd;
 
 	error = do_sys_openat(l, AT_FDCWD, SCARG(uap, path),
@@ -1910,6 +1916,11 @@ sys_openat(struct lwp *l, const struct sys_openat_args *uap,
 		syscallarg(int) mode;
 	} */
 	int error;
+
+	error = pledge_open_check(l, SCARG(uap, oflags));
+	if (error)
+		return error;
+
 	int fd;
 
 	error = do_sys_openat(l, SCARG(uap, fd), SCARG(uap, path),
