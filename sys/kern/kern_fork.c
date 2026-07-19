@@ -2,7 +2,9 @@
 
 /*-
  * Copyright (c) 1999, 2001, 2004, 2006, 2007, 2008, 2019
- *     The NetBSD Foundation, Inc.
+ *     The NetBSD Foundation, Inc. All rights reserved.
+  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team.
  * All rights reserved.
  *
  * This code is derived from software contributed to The NetBSD Foundation

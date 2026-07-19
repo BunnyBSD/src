@@ -7,6 +7,9 @@
  * This code is derived from software contributed to The NetBSD Foundation
  * by Andrew Doran.
  *
+ * Copyright (c) 2026 Karina Karter from BunnyBSD Team
+ * All right reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
