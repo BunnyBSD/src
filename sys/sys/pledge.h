@@ -26,6 +26,7 @@
 
 #pragma once
 #include <sys/stdbool.h>
+#include <sys/stdint.h>
 
 #if defined(_KERNEL) && !defined(_RUMPKERNEL) && !defined(_MODULE)
 #include "opt_pledge.h"
@@ -78,7 +79,7 @@ int pledge_socket_check(struct lwp *l, int domain);
 int pledge_ioctl_check(struct lwp *l, unsigned long com);
 int pledge_sendit_check(struct lwp *l, const void *user_addr);
 int pledge_fcntl_check(struct lwp *l, int cmd);
-int pledge_sysctl_check(struct lwp *l, unsigned int *user_name, unsigned int namelen);
+int pledge_sysctl_check(struct lwp *l, const int *user_name, unsigned int namelen);
 
 struct pledge_promise {
     const char *name;
