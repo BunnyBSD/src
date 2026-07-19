@@ -93,6 +93,7 @@ __KERNEL_RCSID(0, "$NetBSD: kern_sysctl.c,v 1.271 2024/09/08 09:36:51 rillig Exp
 #include <sys/syscallargs.h>
 #include <sys/sysctl.h>
 #include <sys/systm.h>
+#include <sys/pledge.h>
 
 #include <crypto/blake2/blake2s.h>
 
@@ -281,7 +282,12 @@ sys___sysctl(struct lwp *l, const struct sys___sysctl_args *uap, register_t *ret
 		syscallarg(const void *) new;
 		syscallarg(size_t) newlen;
 	} */
-	int error, nerror, name[CTL_MAXNAME];
+	int error = pledge_sysctl_check(l, SCARG(uap, name), SCARG(uap, namelen));
+	if (error)
+		return error;
+
+
+	int nerror, name[CTL_MAXNAME];
 	size_t oldlen, savelen, *oldlenp;
 
 	/*

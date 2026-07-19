@@ -83,6 +83,7 @@ __KERNEL_RCSID(0, "$NetBSD: sys_descrip.c,v 1.52 2025/07/16 19:14:13 kre Exp $")
 #include <sys/ioctl.h>
 #include <sys/fcntl.h>
 #include <sys/kmem.h>
+#include <sys/pledge.h>
 #include <sys/pool.h>
 #include <sys/syslog.h>
 #include <sys/unistd.h>
@@ -329,6 +330,11 @@ sys_fcntl(struct lwp *l, const struct sys_fcntl_args *uap, register_t *retval)
 		syscallarg(void *)	arg;
 	} */
 	int fd, i, tmp, error, cmd, newmin;
+	
+	error = pledge_fcntl_check(l, SCARG(uap, cmd));
+	if (error)
+		return error;
+
 	filedesc_t *fdp;
 	fdtab_t *dt;
 	file_t *fp;
