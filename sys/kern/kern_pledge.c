@@ -50,7 +50,11 @@ pledge_check(struct lwp *l, int code)
         return false;
 
     uint64_t pledge = pledge_syscalls[code];
-    uint64_t mask = l->l_proc->p_pledge;
+    struct proc *p = l->l_proc;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
 
     if (pledge == PLEDGE_ALWAYS)
         return true;
@@ -134,15 +138,22 @@ sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
         if (error)
             return error;
 
+
+        struct proc *p = l->l_proc;
+        mutex_enter(p->p_lock);
+
         /* proc can only drop pledges */
-        if (l->l_proc->p_pledged) {
-            if ((new_mask & ~l->l_proc->p_pledge) != 0) {
+        if (p->p_pledged) {
+            if ((new_mask & ~p->p_pledge) != 0) {
+                mutex_exit(p->p_lock);
                 return EPERM;
             }
         }
 
-        l->l_proc->p_pledge = new_mask;
-        l->l_proc->p_pledged = true;
+        p->p_pledge = new_mask;
+        p->p_pledged = true;
+
+        mutex_exit(p->p_lock);
     }
 
     return 0;
