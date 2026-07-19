@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-NetBSD Syscall and Pledge Manager
+BunnyBSD Syscall and Pledge Manager
 """
 
 import json
