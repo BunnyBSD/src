@@ -136,6 +136,62 @@ pledge_socket_check(struct lwp *l, int domain)
     return 0;
 }
 
+/* gatekeeper for ioctl(2) syscall*/
+int
+pledge_ioctl_check(struct lwp *l, unsigned long com) 
+{
+    struct proc *p = l->l_proc;
+    if (!p->p_pledged) 
+        return 0;
+
+    mutex_enter(p->p_lock);
+    uint64_t mask = p->p_pledge;
+    mutex_exit(p->p_lock);
+
+    unsigned char group = (com >> 8) & 0xff;
+
+    switch (group) {
+        case 't': /* tty ioctl commands (TIOC...) */
+            if ((mask & PLEDGE_TTY) == 0) {
+                return EPERM;
+            }
+            break;
+        case 'i': /* socket/network ioctl commands (SIOC...) */
+            if ((mask & (PLEDGE_INET | PLEDGE_UNIX)) == 0) {
+                return EPERM;
+            }
+            break;
+        case 'A': /* audio device ioctl commands (AUDIO_) */
+        case 'a':
+            if ((mask & PLEDGE_AUDIO) == 0) {
+                return EPERM;
+            }
+            break;
+        case 'f': /* generic file/descriptor ops (FIONBIO, FIONREAD, etc..) */
+            /* always allowed if proc has any basic IO privs*/
+            break;
+        default: /* block unknown if pledged*/
+            return EPERM;
+    }
+
+    return 0;
+}
+
+/* gatekeeper for sendit(2) syscall*/
+int 
+pledge_sendit_check(struct lwp *l, const void *user_addr)
+{}
+
+/* gatekeeper for fcntl(2) syscall*/
+int
+pledge_fcntl_check(struct lwp *l, int cmd)
+{}
+
+/* gatekeeper for sysctl(2) syscall*/
+int
+pledge_sysctl_check(struct lwp *l, unsigned long *user_name, unsigned int namelen)
+{}
+
 /*
  * parses pledges 0 on success EINVAL if unknown promise
  */

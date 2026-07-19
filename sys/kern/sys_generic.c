@@ -515,7 +515,13 @@ sys_ioctl(struct lwp *l, const struct sys_ioctl_args *uap, register_t *retval)
 	struct file	*fp;
 	proc_t		*p;
 	u_long		com;
+
 	int		error;
+	error = pledge_ioctl_check(l, SCARG(uap, com));
+
+	if (error)
+		return error;
+
 	size_t		size, alloc_size;
 	void 		*data, *memp;
 #define	STK_PARAMS	128
