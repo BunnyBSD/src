@@ -620,6 +620,7 @@ __END_DECLS
         f_pledge.write("#include <sys/types.h>\n")
         f_pledge.write("#include <sys/syscall.h>\n")
         f_pledge.write("#include <sys/pledge.h>\n\n")
+        f_pledge.write("#ifdef PLEDGE\n\n")
         f_pledge.write("const uint64_t pledge_syscalls[SYS_NSYSENT] = {\n")
 
         for entry in data:
@@ -648,7 +649,8 @@ __END_DECLS
         for p in promises:
             f_pledge.write(f'    {{ "{p}", PLEDGE_{p.upper()} }},\n')
         f_pledge.write('    { NULL, 0 }\n')
-        f_pledge.write("};\n")
+        f_pledge.write("};\n\n")
+        f_pledge.write("#endif /* PLEDGE */\n")
 
     # 4. Generate the man page
     generate_pledge_man(data, man_path)

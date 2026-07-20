@@ -5,6 +5,8 @@
 #include <sys/syscall.h>
 #include <sys/pledge.h>
 
+#ifdef PLEDGE
+
 const uint64_t pledge_syscalls[SYS_NSYSENT] = {
 #ifdef SYS_exit
     [SYS_exit] = PLEDGE_ALWAYS,
@@ -1161,3 +1163,5 @@ const struct pledge_promise pledge_promises[] = {
     { "wpath", PLEDGE_WPATH },
     { NULL, 0 }
 };
+
+#endif /* PLEDGE */
