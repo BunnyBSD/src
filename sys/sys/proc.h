@@ -356,6 +356,9 @@ struct proc {
 
 	uint64_t    p_pledge; /* :: pledge mask */
 	bool        p_pledged; /* :: is process pledged at all */
+
+	uint64_t    p_pledge_exec; /* :: execPromises pledge mask */
+	bool        p_pledged_exec; /* :: is execpromises pledged */
 };
 
 #define	p_rlimit	p_limit->pl_rlimit

@@ -47,7 +47,7 @@ extern const uint64_t pledge_syscalls[SYS_NSYSENT];
  * Helper to check
  */
 
-int 
+int
 pledge_check(struct lwp *l, int code)
 {
     struct proc *p = l->l_proc;
@@ -57,34 +57,41 @@ pledge_check(struct lwp *l, int code)
     mutex_enter(p->p_lock);
     pledged = p->p_pledged;
     mask = p->p_pledge;
-    mutex_exit(p->p_lock);
 
-    if (!pledged)
+    if (!pledged) {
+        mutex_exit(p->p_lock);
         return 0;
+    }
 
-    if (code < 0 || code >= SYS_NSYSENT)
-        return EPERM;
-
-    uint64_t pledge = pledge_syscalls[code];
-    if (pledge == PLEDGE_ALWAYS)
-        return 0;
-
-    if (mask == 0 || (mask & pledge) == 0) {
-        if (mask & PLEDGE_ERROR) {
-            return EPERM;
-        }
-        sigexit(l, SIGABRT);
-        /* NOTREACHED */
+    if (code < 0 || code >= SYS_NSYSENT) {
+        mutex_exit(p->p_lock);
         return EPERM;
     }
 
+    uint64_t pledge = pledge_syscalls[code];
+    if (pledge == PLEDGE_ALWAYS) {
+        mutex_exit(p->p_lock);
+        return 0;
+    }
 
+    if (mask == 0 || (mask & pledge) == 0) {
+        if (mask & PLEDGE_ERROR) {
+            mutex_exit(p->p_lock);
+            return EPERM;
+        }
+        sigexit(l, SIGABRT); /* sigexit() requires to hold process's lock */
+        /* NOTREACHED */
+        mutex_exit(p->p_lock);
+        return EPERM;
+    }
+
+    mutex_exit(p->p_lock);
     return 0;
 }
 
 /* gatekeeper for open(2) with pledge */
-int 
-pledge_open_check(struct lwp *l, int flags) 
+int
+pledge_open_check(struct lwp *l, int flags)
 {
     struct proc *p = l->l_proc;
     bool pledged;
@@ -159,7 +166,7 @@ pledge_socket_check(struct lwp *l, int domain)
 
 /* gatekeeper for ioctl(2) syscall*/
 int
-pledge_ioctl_check(struct lwp *l, unsigned long com) 
+pledge_ioctl_check(struct lwp *l, unsigned long com)
 {
     struct proc *p = l->l_proc;
     bool pledged;
@@ -203,7 +210,7 @@ pledge_ioctl_check(struct lwp *l, unsigned long com)
 }
 
 /* gatekeeper for sendit(2) syscall*/
-int 
+int
 pledge_sendit_check(struct lwp *l, const struct sockaddr *sa)
 {
     struct proc *p = l->l_proc;
@@ -228,7 +235,7 @@ pledge_sendit_check(struct lwp *l, const struct sockaddr *sa)
             return EPERM;
         }
     }
-    
+
     else if (family == AF_UNIX) {
         if ((mask & PLEDGE_UNIX) == 0) {
             return EPERM;
@@ -347,8 +354,8 @@ pledge_parse(const char *promises_str, uint64_t *out_mask)
         /* searching tok in promises array*/
         bool found = false;
         for (size_t i = 0; pledge_promises[i].name != NULL; i++) {
-            /* 
-             * checking len and containments here to exclude collisions 
+            /*
+             * checking len and containments here to exclude collisions
              */
             if (strncmp(token_start, pledge_promises[i].name, token_len) == 0 &&
                 pledge_promises[i].name[token_len] == '\0') {
@@ -376,37 +383,68 @@ sys_pledge(struct lwp *l, const struct sys_pledge_args *uap, register_t *retval)
     char buf[PLEDGE_MAX_PROMISES_LEN];
     size_t done;
     int error;
-    uint64_t new_mask = 0;
-
-    if (SCARG(uap, execpromises) != NULL) return ENOSYS; /* execpromises not implemented yet*/
+    uint64_t mask = 0, emask = 0; /* e stands for exec */
+    bool has_promises = false, has_promises_exec = false;
 
     if (SCARG(uap, promises) != NULL) {
         error = copyinstr(SCARG(uap, promises), buf, sizeof(buf), &done);
         if (error)
             return error;
 
-        error = pledge_parse(buf, &new_mask);
+        error = pledge_parse(buf, &mask);
         if (error)
             return error;
 
-
-        struct proc *p = l->l_proc;
-        mutex_enter(p->p_lock);
-
-        /* proc can only drop pledges */
-        if (p->p_pledged) {
-            if ((new_mask & ~p->p_pledge) != 0) {
-                mutex_exit(p->p_lock);
-                return EPERM;
-            }
-        }
-
-        p->p_pledge = new_mask;
-        p->p_pledged = true;
-
-        mutex_exit(p->p_lock);
+        has_promises = true;
     }
 
+    if (SCARG(uap, execpromises) != NULL) {
+        error = copyinstr(SCARG(uap, execpromises), buf, sizeof(buf), &done);
+        if (error)
+            return error;
+
+        error = pledge_parse(buf, &emask);
+        if (error)
+            return error;
+
+        has_promises_exec = true;
+    }
+
+
+    struct proc *p = l->l_proc;
+    mutex_enter(p->p_lock);
+
+    if (has_promises && p->p_pledged) {
+        /* proc can only drop pledges */
+        if ((mask & ~p->p_pledge) != 0) {
+            mutex_exit(p->p_lock);
+            return EPERM;
+        }
+    }
+
+    if (has_promises_exec && p->p_pledged_exec) {
+        /* same goes for execpromises */
+        if ((emask & ~p->p_pledge_exec) != 0) {
+            mutex_exit(p->p_lock);
+            return EPERM;
+        }
+    }
+
+    /* updating here to be sure everything is correct everywhere and
+     * we wont update like pledges mask and return EPERM
+     */
+
+    if (has_promises) {
+        p->p_pledge = mask;
+        p->p_pledged = true;
+    }
+
+    if (has_promises_exec) {
+        p->p_pledge_exec = emask;
+        p->p_pledged_exec = true;
+    }
+
+    mutex_exit(p->p_lock);
     return 0;
 }
 
