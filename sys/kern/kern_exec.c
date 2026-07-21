@@ -1452,8 +1452,6 @@ execve_runproc(struct lwp *l, struct execve_data * restrict data,
 	if (p->p_pledged_exec) {
 		p->p_pledge = p->p_pledge_exec;
 		p->p_pledged = true;
-		p->p_pledge_exec = 0;
-		p->p_pledged_exec = false;
 	} else {
 		p->p_pledge = 0;
 		p->p_pledged = false;
