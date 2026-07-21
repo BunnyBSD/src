@@ -20,6 +20,7 @@
 #define NEW_FILE   "/tmp/test_pledge_new.tmp"
 
 static int total_failed_tests = 0;
+static char exec_path[1024];
 
 static int check_result(const char *phase, const char *test_name, int ret, int err, bool should_succeed);
 static int test_open_read(const char *phase, bool should_succeed);
@@ -42,21 +43,21 @@ check_result(const char *phase, const char *test_name, int ret, int err, bool sh
 
     if (should_succeed) {
         if (allowed) {
-            printf("  [%s] SUCCESS: %s allowed (ret: %d, err: %s)\n", 
+            printf("  [%s] SUCCESS: %s allowed (ret: %d, err: %s)\n",
                    phase, test_name, ret, strerror(err));
             return 0;
         } else {
-            printf("  [%s] FAIL: %s blocked unexpectedly: %s\n", 
+            printf("  [%s] FAIL: %s blocked unexpectedly: %s\n",
                    phase, test_name, strerror(err));
             return 1;
         }
     } else {
         if (!allowed) {
-            printf("  [%s] SUCCESS: %s blocked safely: %s\n", 
+            printf("  [%s] SUCCESS: %s blocked safely: %s\n",
                    phase, test_name, strerror(err));
             return 0;
         } else {
-            printf("  [%s] FAIL: %s allowed but should be blocked (ret: %d, err: %s)\n", 
+            printf("  [%s] FAIL: %s allowed but should be blocked (ret: %d, err: %s)\n",
                    phase, test_name, ret, strerror(err));
             return 1;
         }
@@ -122,7 +123,7 @@ test_connect_inet(const char *phase, bool should_succeed)
 {
     int s = socket(AF_INET, SOCK_STREAM, 0);
     if (s < 0) return 0; /* socket creation check is covered separately */
-    
+
     struct sockaddr_in sin = { .sin_family = AF_INET, .sin_port = htons(80) };
     sin.sin_addr.s_addr = inet_addr("127.0.0.1");
 
@@ -201,9 +202,58 @@ test_sysctl_unsafe(const char *phase, bool should_succeed)
     return ret;
 }
 
+static int
+test_exec_rpath(const char *phase)
+{
+    int fd = open(EXIST_FILE, O_RDONLY);
+    int err = errno;
+    int ret = check_result(phase, "exec open(O_RDONLY)", fd, err, true);
+    if (fd >= 0) close(fd);
+    if (ret != 0) return ret;
+
+    fd = open(EXIST_FILE, O_WRONLY);
+    err = errno;
+    ret = check_result(phase, "exec open(O_WRONLY)", fd, err, false);
+    if (fd >= 0) close(fd);
+    return ret;
+}
+
+static int
+test_exec_stdio(const char *phase)
+{
+    int fd = open(EXIST_FILE, O_RDONLY);
+    int err = errno;
+    int ret = check_result(phase, "exec open(O_RDONLY)", fd, err, false);
+    if (fd >= 0) close(fd);
+    return ret;
+}
+
 int
 main(int argc, char *argv[])
 {
+    /* Query the absolute path of the currently running binary */
+    int path_mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+    size_t path_len = sizeof(exec_path);
+
+    if (sysctl(path_mib, 4, exec_path, &path_len, NULL, 0) != 0 || strlen(exec_path) == 0) {
+        /* Fallback if sysctl fails or returns empty string */
+        if (argv[0] != NULL && argv[0][0] == '/') {
+            strncpy(exec_path, argv[0], sizeof(exec_path) - 1);
+        } else {
+            /* If argv[0] is relative, use the standard absolute installation path */
+            strncpy(exec_path, "/usr/bin/_debug", sizeof(exec_path) - 1);
+        }
+    }
+
+    if (argc > 1 && strcmp(argv[1], "--exec-target-rpath") == 0) {
+        return test_exec_rpath("PHASE 13 TARGET");
+    }
+
+
+    if (argc > 1 && strcmp(argv[1], "--exec-target-stdio") == 0) {
+        return test_exec_stdio("PHASE 14 TARGET");
+    }
+
     printf("=== Starting Complete Dynamic Isolated Sandbox Tests ===\n\n");
 
     /* Pre-create a temporary file for reading/writing tests */
@@ -245,6 +295,48 @@ main(int argc, char *argv[])
             }                                                                  \
             int child_fails = 0;                                               \
             code_block;                                                        \
+            exit(child_fails);                                                 \
+        } else {                                                               \
+            int status;                                                        \
+            waitpid(pid, &status, 0);                                          \
+            if (WIFEXITED(status)) {                                           \
+                int child_fails = WEXITSTATUS(status);                         \
+                if (expect_signal) {                                           \
+                    printf("  [Parent] FAIL: Expected child to be signaled, but it exited normally\n"); \
+                    total_failed_tests++;                                      \
+                } else {                                                       \
+                    total_failed_tests += child_fails;                         \
+                }                                                              \
+            } else if (WIFSIGNALED(status)) {                                  \
+                int sig = WTERMSIG(status);                                    \
+                if (expect_signal) {                                           \
+                    printf("  [Parent] SUCCESS: Child terminated by expected signal %d (%s)\n", \
+                           sig, strsignal(sig));                               \
+                } else {                                                       \
+                    printf("  [Parent] FAIL: Child killed unexpectedly by signal %d (%s)\n", \
+                           sig, strsignal(sig));                               \
+                    total_failed_tests++;                                      \
+                }                                                              \
+            }                                                                      \
+        }                                                                      \
+    } while (0)
+
+    #define RUN_SANDBOX_EXEC_TEST(phase_name, promises, execpromises, expect_signal, ...) \
+    do {                                                                       \
+        printf("\n[%s] Testing with pledge(\"%s\", \"%s\")...\n", phase_name, promises, execpromises); \
+        fflush(stdout);                                                        \
+        pid_t pid = fork();                                                    \
+        if (pid < 0) {                                                         \
+            perror("fork failed");                                             \
+            return 1;                                                          \
+        }                                                                      \
+        if (pid == 0) {                                                        \
+            if (pledge(promises, execpromises) != 0) {                         \
+                printf("  [Child] pledge failed: %s\n", strerror(errno));      \
+                exit(1);                                                       \
+            }                                                                  \
+            int child_fails = 0;                                               \
+            __VA_ARGS__;                                                       \
             exit(child_fails);                                                 \
         } else {                                                               \
             int status;                                                        \
@@ -315,13 +407,13 @@ main(int argc, char *argv[])
     });
 
     /* Phase 8: Locking with flock allowed (stdio flock error) */
-    RUN_SANDBOX_TEST("PHASE 8", "stdio flock error", false, {
+    RUN_SANDBOX_TEST("PHASE 8", "stdio rpath wpath flock error", false, {
         child_fails += test_fcntl_safe("PHASE 8", true);
         child_fails += test_fcntl_lock("PHASE 8", true);
     });
 
     /* Phase 9: Locking without flock blocked safely (stdio error) */
-    RUN_SANDBOX_TEST("PHASE 9", "stdio error", false, {
+    RUN_SANDBOX_TEST("PHASE 9", "stdio rpath wpath error", false, {
         child_fails += test_fcntl_safe("PHASE 9", true);
         child_fails += test_fcntl_lock("PHASE 9", false);
     });
@@ -347,6 +439,15 @@ main(int argc, char *argv[])
         int fd = open(EXIST_FILE, O_RDONLY);
         printf("  [Child] FAIL: I survived! fd = %d\n", fd);
         if (fd >= 0) close(fd);
+        child_fails++;
+    });
+
+    /* Phase 13: Execpromises transition check (stdio rpath memory_mgmt error) */
+    RUN_SANDBOX_EXEC_TEST("PHASE 13", "stdio exec error",  "stdio rpath file_metadata_read memory_mgmt thread_lwp sys_info error", false, {
+        char target[] = "--exec-target-rpath";
+        char *child_args[] = { exec_path, target, NULL };
+        execve(exec_path, child_args, NULL);
+        perror("execve failed");
         child_fails++;
     });
 
