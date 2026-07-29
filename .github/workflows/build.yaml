@@ -36,6 +36,8 @@ jobs:
             build_args: "-m amd64"
           - arch: "arm64"
             build_args: "-m evbarm -a aarch64"
+          - arch: "riscv64"
+            build_args: "-m riscv"
 
     steps:
     - name: Checkout repository
