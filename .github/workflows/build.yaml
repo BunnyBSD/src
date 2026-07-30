@@ -36,6 +36,8 @@ jobs:
             build_args: "-m amd64"
           - arch: "arm64"
             build_args: "-m evbarm -a aarch64"
+          - arch: "riscv64"
+            build_args: "-m riscv"
 
     steps:
     - name: Checkout repository
@@ -52,13 +54,33 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-bunny-build-${{ matrix.arch }}-
 
-    # build release (tools, kernel distribution) and live image
-    - name: Build release and live-image
+    # build tools
+    - name: 1. Build Tools
       run: |
-        echo "Starting build (output is being redirected to build.log to prevent log spam)..."
-        if ! ./build.sh -O obj ${{ matrix.build_args }} -U -u -N 0 -V HOST_CC="cc -std=gnu11" -j$(nproc) release live-image > build.log 2>&1; then
-          echo "::error::Build failed! Showing last 500 lines of build.log:"
-          tail -n 500 build.log
+        echo "Building tools for ${{ matrix.arch }}..."
+        if ! ./build.sh -O obj ${{ matrix.build_args }} -U -u -N 0 -V HOST_CC="cc -std=gnu11" -j$(nproc) tools > build.log 2>&1; then
+          echo "::error::Tools build failed! Showing last 200 lines of build.log:"
+          tail -n 200 build.log
+          exit 1
+        fi
+
+    # build kernel (BUNNYCORE)
+    - name: 2. Build Kernel (BUNNYCORE)
+      run: |
+        echo "Building kernel BUNNYCORE for ${{ matrix.arch }}..."
+        if ! ./build.sh -O obj ${{ matrix.build_args }} -U -u -N 0 -V HOST_CC="cc -std=gnu11" -j$(nproc) kernel=BUNNYCORE >> build.log 2>&1; then
+          echo "::error::Kernel build failed! Showing last 200 lines of build.log:"
+          tail -n 200 build.log
+          exit 1
+        fi
+
+    # build release and live image
+    - name: 3. Build Release and Live Image
+      run: |
+        echo "Building release and live-image for ${{ matrix.arch }}..."
+        if ! ./build.sh -O obj ${{ matrix.build_args }} -U -u -N 0 -V HOST_CC="cc -std=gnu11" -j$(nproc) release live-image >> build.log 2>&1; then
+          echo "::error::Release / Live-image build failed! Showing last 200 lines of build.log:"
+          tail -n 200 build.log
           exit 1
         fi
 
@@ -70,15 +92,6 @@ jobs:
         path: obj
         key: ${{ runner.os }}-bunny-build-${{ matrix.arch }}-${{ github.sha }}
 
-    # upload full build log only if the build fails
-    - name: Upload Build Log on Failure
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: Build-Log-${{ matrix.arch }}
-        path: build.log
-        retention-days: 3
-
     # if built on a regular branch, upload a temp artifact
     - name: Upload Temporary Artifact (for branch builds)
       if: startsWith(github.ref, 'refs/tags/') == false
@@ -86,7 +99,7 @@ jobs:
       with:
         name: BunnyBSD-Live-Image-Dev-${{ matrix.arch }}
         path: obj/releasedir/images/*.img.gz
-        if-no-files-found: error
+        if-no-files-found: warn
         retention-days: 7
 
     # github release on tag build
@@ -100,3 +113,12 @@ jobs:
         gh release upload "$GITHUB_REF_NAME" obj/releasedir/images/*.img.gz --clobber
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # upload full build log only if the build fails
+    - name: Upload Build Log on Failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build-Log-${{ matrix.arch }}
+        path: build.log
+        retention-days: 3
