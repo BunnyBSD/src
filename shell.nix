@@ -1,4 +1,7 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import (fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/531670d871c0.tar.gz";
+  }) {}
+}:
 
 let
   hostIncludes = "-I${pkgs.zlib.dev}/include -I${pkgs.ncurses.dev}/include";
@@ -9,7 +12,7 @@ in
   hardeningDisable = [ "format" ];
 
   nativeBuildInputs = with pkgs; [
-    gnumake
+    bmake
     clang-tools
     flex
     bison
